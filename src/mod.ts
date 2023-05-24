@@ -1,1 +1,1 @@
-export * from "./vectorizer/mod.ts"
+export * from "./text/mod.ts"
