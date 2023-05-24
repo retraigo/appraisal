@@ -7,8 +7,13 @@ export interface CountVectorizerOptions extends BaseVectorizerOptions {
   vocabulary?: Map<string, number>;
 }
 
+/**
+ * Convert text into vectors
+ */
 export class CountVectorizer extends BaseVectorizer {
+  /** Map words to indices */
   vocabulary: Map<string, number>;
+  /** An internal counter for remembering the last index in vocabulary. */
   #lastToken: Uint32Array;
   constructor(options: CountVectorizerOptions) {
     super(options);
@@ -18,9 +23,10 @@ export class CountVectorizer extends BaseVectorizer {
   get lastToken(): number {
     return Atomics.load(this.#lastToken, 0);
   }
+  /** Construct a vocabulary from a given set of text. */
   fit(
     text: string | string[],
-  ) {
+  ): CountVectorizer {
     if (Array.isArray(text)) {
       let i = 0;
       while (i < text.length) {
@@ -44,16 +50,26 @@ export class CountVectorizer extends BaseVectorizer {
               continue;
             }
           }
-          const token = this.incrementToken();
+          const token = this.#incrementToken();
           this.vocabulary.set(words[i], token);
         }
         i += 1;
       }
     }
+    return this;
   }
+  /** 
+   * Convert a document (string | array of strings) into vectors. 
+   * The vectors are Uint32Arrays.
+   */
   transform(text: string[]): Uint32Array[];
   transform(text: string): Uint32Array;
   transform(text: string | string[]): Uint32Array | Uint32Array[] {
+    if (!this.vocabulary.size) {
+      throw new Error(
+        "CountVectorizer vocabulary not initialized yet. Call `new CountVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
+      );
+    }
     if (Array.isArray(text)) {
       const res = new Array(text.length);
       let i = 0;
@@ -79,7 +95,7 @@ export class CountVectorizer extends BaseVectorizer {
       return res;
     }
   }
-  incrementToken(): number {
+  #incrementToken(): number {
     return Atomics.add(this.#lastToken, 0, 1);
   }
 }
