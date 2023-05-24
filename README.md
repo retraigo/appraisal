@@ -25,7 +25,8 @@ console.log(vec2);
 
 <details> 
   <summary>Output</summary>
-  ```ts
+  <pre>
+    <code>
 [
   Float32Array(20) [
     3.386294364929199, 2.386294364929199,
@@ -76,5 +77,6 @@ console.log(vec2);
     2.386294364929199,  2.386294364929199
   ]
 ]
-```
+    </code>
+  </pre>
 </details>
