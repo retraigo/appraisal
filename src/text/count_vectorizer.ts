@@ -1,4 +1,4 @@
-import { BaseVectorizer } from "./base.ts";
+import { BaseVectorizer, preprocess } from "./base.ts";
 import { DefaultIgnoreList } from "../util.ts";
 
 import type { BaseVectorizerOptions } from "./base.ts";
@@ -34,7 +34,7 @@ export class CountVectorizer extends BaseVectorizer {
         i += 1;
       }
     } else {
-      if (this.lowercase) text = text.toLowerCase();
+      text = preprocess(text, this)
       const words = text.split(" ");
       let i = 0;
       while (i < words.length) {
@@ -79,7 +79,7 @@ export class CountVectorizer extends BaseVectorizer {
       }
       return res;
     } else {
-      if (this.lowercase) text = text.toLowerCase();
+      text = preprocess(text, this)
       const res = new Uint32Array(this.vocabulary.size);
       const words = text.split(" ");
       let i = 0;
