@@ -19,6 +19,9 @@ export class CountVectorizer extends BaseVectorizer {
     super(options);
     this.vocabulary = options.vocabulary ?? new Map();
     this.#lastToken = new Uint32Array(1);
+    if(this.vocabulary.size) {
+      this.#lastToken[0] = this.vocabulary.size
+    }
   }
   get lastToken(): number {
     return Atomics.load(this.#lastToken, 0);
