@@ -1,12 +1,3 @@
-import { BaseVectorizer } from "./base.ts";
-import { DefaultIgnoreList } from "../util.ts";
-import { CountVectorizer } from "./count_vectorizer.ts";
-import type { BaseVectorizerOptions } from "./base.ts";
-
-export interface CountVectorizerOptions extends BaseVectorizerOptions {
-  vocabulary?: Map<string, number>;
-}
-
 /** Return a matrix of document frequencies of each term in an array of TF features. */
 export function countFrequency(data: ArrayLike<number>[]): Float32Array {
   const freq = new Float32Array(data[0].length);
@@ -61,7 +52,11 @@ export class TfIdfTransformer {
     this.idf = spFromDiags(idf, shape.features);
     return this;
   }
-  /** Transform an tf features into tf-idf features. */
+  /** 
+   * Transform an tf features into tf-idf features. 
+   * Warning: Currently extremely slow. If you have a fast matrix multiplication
+   * method, consider using that to multiply `data` and `TfIdfTransformer.idf`.
+   */
   transform(data: ArrayLike<number>[]): Float32Array[] {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return matMul(data, this.idf);
