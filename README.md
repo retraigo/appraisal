@@ -1,6 +1,11 @@
 # Vectorizer
 
-- Text vectorizer in TypeScript. Based on scikit-learn's `CountVectorizer` and `TfidfTransformer`.
+- Extract vectors from data. Inspired by scikit-learn's `feature_extraction` module.
+
+## Modules
+- [Count Vectorizer](/src/text/count_vectorizer.ts)
+- [Tf-Idf Transformer](/src/text/tfidf_transformer.ts)
+- [Patch Extractor](/src/image/patch_2d.ts)
 
 ## Usage
 
