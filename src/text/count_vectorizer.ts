@@ -8,7 +8,7 @@ export interface CountVectorizerOptions extends BaseVectorizerOptions {
 }
 
 /**
- * Convert text into vectors
+ * Convert text into vectors (bag of words)
  */
 export class CountVectorizer extends BaseVectorizer {
   /** Map words to indices */
