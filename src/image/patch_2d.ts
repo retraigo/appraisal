@@ -12,7 +12,7 @@ import { Image2d, Patch2d, PatchCollection } from "../types.ts";
  * @returns [row, column]
  */
 function clamp(n: number, width: number): [number, number] {
-  if (n > width) return [~~(n / width), n % width];
+  if (n >= width) return [~~(n / width), n % width];
   return [0, n];
 }
 
@@ -21,9 +21,12 @@ function extract(
   image: Image2d,
   options: Patch2d,
 ): [Uint8ClampedArray, number] {
+  /** Get number of possible patches in each dimension */
   const nX = image.width - options.width + 1;
   const nY = image.height - options.height + 1;
+  /** Total number of patches is nX * nY */
   const nPatches = nX * nY;
+  /** Area of each patch, used to calculate offset of resulting array */
   const patchArea = options.width * options.height;
 
   const res = new Uint8ClampedArray(
@@ -33,10 +36,13 @@ function extract(
   let i = 0;
   while (i < nPatches) {
     const [row, col] = clamp(i, nX);
+    /** Starting index of the current patch */
     const offset = (row * image.width) + col;
     let j = 0;
     while (j < options.height) {
+      /** Starting index of the current subrow */
       const patchRow = j * image.width;
+      /** Copy the entire patchArea-size patch into the resulting array */
       res.set(
         image.data.slice(
           (offset + patchRow) * image.channels,
