@@ -1,6 +1,6 @@
 /** Return a matrix of document frequencies of each term in an array of TF features. */
-export function countFrequency(data: ArrayLike<number>[]): Float32Array {
-  const freq = new Float32Array(data[0].length);
+export function countFrequency(data: ArrayLike<number>[]): Float64Array {
+  const freq = new Float64Array(data[0].length);
   let i = 0;
   while (i < data.length) {
     let j = 0;
@@ -15,7 +15,7 @@ export function countFrequency(data: ArrayLike<number>[]): Float32Array {
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {
-  idf: null | Float32Array;
+  idf: null | Float64Array;
   constructor() {
     this.idf = null;
   }
@@ -27,7 +27,7 @@ export class TfIdfTransformer {
     };
     const freq = countFrequency(data);
 
-    const idf = new Float32Array(freq.length);
+    const idf = new Float64Array(freq.length);
 
     let i = 0;
     while (i < idf.length) {
@@ -40,18 +40,18 @@ export class TfIdfTransformer {
   /** 
    * Transform an tf features into tf-idf features. 
    */
-  transform(data: ArrayLike<number>[]): Float32Array[] {
+  transform(data: ArrayLike<number>[]): Float64Array[] {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }
 }
 
 /** A very basic, low-effort multiplication. */
-export function multiplyDiags(x: ArrayLike<number>[], y: ArrayLike<number>): Float32Array[] {
+export function multiplyDiags(x: ArrayLike<number>[], y: ArrayLike<number>): Float64Array[] {
   const res = new Array(x.length);
   let i = 0;
   while (i < x.length) {
-    res[i] = new Float32Array(y.length)
+    res[i] = new Float64Array(y.length)
     let j = 0;
     while (j < y.length) {
       res[i][j] = x[i][j] * y[j]
