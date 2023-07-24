@@ -1,6 +1,6 @@
-# Vectorizer
+# Preprocess
 
-- Extract vectors from data. Inspired by scikit-learn's `feature_extraction` module.
+- Inspired by scikit-learn's `feature_extraction` module.
 
 ## Modules
 - [Count Vectorizer](/src/text/count_vectorizer.ts)
