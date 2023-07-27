@@ -157,7 +157,7 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < this.nRows) {
       let j = 0;
-      while (i < this.nCols) {
+      while (j < this.nCols) {
         sum[j] += this.data[this.nCols * i + j];
         j += 1;
       }
