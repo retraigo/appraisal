@@ -1,17 +1,4 @@
-/** Return a matrix of document frequencies of each term in an array of TF features. */
-export function countFrequency(data: ArrayLike<number>[]): Float64Array {
-  const freq = new Float64Array(data[0].length);
-  let i = 0;
-  while (i < data.length) {
-    let j = 0;
-    while (j < data[i].length) {
-      freq[j] += data[i][j];
-      j += 1;
-    }
-    i += 1;
-  }
-  return freq;
-}
+import { Matrix } from "../utils/matrix.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {
@@ -20,12 +7,12 @@ export class TfIdfTransformer {
     this.idf = null;
   }
   /** Get idf matrix from tf features. */
-  fit(data: ArrayLike<number>[]): TfIdfTransformer {
+  fit(data: Matrix<Float32Array>): TfIdfTransformer {
     const shape = {
-      features: data[0].length,
-      samples: data.length,
+      features: data.nCols,
+      samples: data.nRows,
     };
-    const freq = countFrequency(data);
+    const freq = data.rowSum();
 
     const idf = new Float64Array(freq.length);
 
@@ -37,24 +24,26 @@ export class TfIdfTransformer {
     this.idf = idf;
     return this;
   }
-  /** 
-   * Transform an tf features into tf-idf features. 
+  /**
+   * Transform an tf features into tf-idf features.
    */
-  transform(data: ArrayLike<number>[]): Float64Array[] {
+  transform(data: Matrix<Float32Array>): Matrix<Float32Array> {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }
 }
 
 /** A very basic, low-effort multiplication. */
-export function multiplyDiags(x: ArrayLike<number>[], y: ArrayLike<number>): Float64Array[] {
-  const res = new Array(x.length);
+export function multiplyDiags(
+  x: Matrix<Float32Array>,
+  y: Float64Array,
+): Matrix<Float32Array> {
+  const res = new Matrix(new Float32Array(x.data.length), x.shape);
   let i = 0;
-  while (i < x.length) {
-    res[i] = new Float64Array(y.length)
+  while (i < x.nRows) {
     let j = 0;
     while (j < y.length) {
-      res[i][j] = x[i][j] * y[j]
+      res.setCell(i, j, x.item(i, j) * y[j]);
       j += 1;
     }
     i += 1;
