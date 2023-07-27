@@ -174,7 +174,7 @@ export class Matrix<T extends TypedArray> {
     this.data[row * this.nCols + col] += val;
   }
   /** Replace a column */
-  setCol(col: number, val: T) {
+  setCol(col: number, val: ArrayLike<number>) {
     let i = 0;
     while (i < this.nRows) {
       this.data[i * this.nCols + col] = val[i];
@@ -187,7 +187,7 @@ export class Matrix<T extends TypedArray> {
     this.data[row * this.nCols + col] = val;
   }
   /** Replace a row */
-  setRow(row: number, val: T) {
+  setRow(row: number, val: ArrayLike<number>) {
     this.data.set(val, row * this.nCols);
   }
   /** Iterate through rows */
