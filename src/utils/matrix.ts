@@ -155,11 +155,11 @@ export class Matrix<T extends TypedArray> {
     return res;
   }
   /** Filter the matrix by rows */
-  filter(fn: (value: T, row: number) => boolean): Matrix<T> {
+  filter<S extends T>(fn: (value: T, row: number, _: T[]) => value is S): Matrix<T> {
     const satisfying = [];
     let i = 0;
     while (i < this.nRows) {
-      if (fn(this.row(i), i)) {
+      if (fn(this.row(i), i, [])) {
         satisfying.push(i);
       }
       i += 1;
