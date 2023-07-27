@@ -100,6 +100,9 @@ export class Matrix<T extends TypedArray> {
     /** Number of columns in the matrix */
     this.nCols = shape[1];
   }
+  get length(): number {
+    return this.nRows;
+  }
   /** Returns [rows, columns] */
   get shape(): [number, number] {
     return [this.nRows, this.nCols];
