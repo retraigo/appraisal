@@ -1,4 +1,3 @@
-
 type DataType =
   | "u8"
   | "u16"
@@ -155,12 +154,14 @@ export class Matrix<T extends TypedArray> {
   /** Compute the sum of all rows */
   rowSum(): T {
     const sum = new (getDataConstructor(this.data))(this.nCols) as T;
-    for (const row of this.rows()) {
-      let i = 0;
-      while (i < row.length) {
-        sum[i] += row[i];
-        i += 1;
+    let i = 0;
+    while (i < this.nRows) {
+      let j = 0;
+      while (i < this.nCols) {
+        sum[j] += this.data[this.nCols * i + j];
+        j += 1;
       }
+      i += 1;
     }
     return sum;
   }
