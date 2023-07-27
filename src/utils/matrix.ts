@@ -116,6 +116,10 @@ export class Matrix<T extends TypedArray> {
     }
     return new Matrix(resArr, [this.nCols, this.nRows]);
   }
+  /** Alias for row */
+  at(pos: number): T {
+    return this.row(pos);
+  }
   /** Get the nth column in the matrix */
   col(n: number): T {
     let i = 0;
@@ -146,6 +150,27 @@ export class Matrix<T extends TypedArray> {
       j += 1;
     }
     return res;
+  }
+  /** Filter the matrix by rows */
+  filter(fn: (value: T, row: number) => boolean): Matrix<T> {
+    const satisfying = [];
+    let i = 0;
+    while (i < this.nRows) {
+      if (fn(this.row(i), i)) {
+        satisfying.push(i);
+      }
+      i += 1;
+    }
+    const matrix = new Matrix(
+      getDataConstructor(this.data) as unknown as (new (len: number) => T),
+      [satisfying.length, this.nCols],
+    );
+    i = 0;
+    while (i < satisfying.length) {
+      matrix.setRow(i, this.row(satisfying[i]));
+      i += 1;
+    }
+    return matrix;
   }
   /** Get an item using a row and column index */
   item(row: number, col: number): number {
@@ -189,6 +214,16 @@ export class Matrix<T extends TypedArray> {
   /** Replace a row */
   setRow(row: number, val: ArrayLike<number>) {
     this.data.set(val, row * this.nCols);
+  }
+  /** Slice matrix by rows */
+  slice(start = 0, end?: number): Matrix<T> {
+    return new Matrix<T>(
+      this.data.slice(
+        start ? start * this.nCols : 0,
+        end ? end * this.nCols : undefined,
+      ) as T,
+      [end ? end - start : this.nRows - start, this.nCols],
+    );
   }
   /** Iterate through rows */
   *rows(): Generator<T> {
