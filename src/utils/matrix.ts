@@ -86,15 +86,19 @@ export class Matrix<T extends TypedArray> {
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
-  constructor(data: T, shape: [number, number]) {
-    /** Type of data held by the matrix */
-    this.dtype = getDataType(data);
+  constructor(data: T | (new (len: number) => T), shape: [number, number]) {
+    // Check if it is an actual array
+    if (ArrayBuffer.isView(data)) {
+      this.data = data;
+      this.dtype = getDataType(data);
+    } else { // if not, construct a new one
+      this.data = new data(shape[0] * shape[1]);
+      this.dtype = getDataType(this.data);
+    }
     /** Number of rows in the matrix */
     this.nRows = shape[0];
     /** Number of columns in the matrix */
     this.nCols = shape[1];
-    /** Raw data in the matrix */
-    this.data = data;
   }
   /** Returns [rows, columns] */
   get shape(): [number, number] {
