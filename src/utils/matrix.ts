@@ -49,24 +49,27 @@ function getDataType(data: TypedArray): DataType {
     ? "f64"
     : "u8"; // shouldn't reach "u8"
 }
-function getDataConstructor(data: TypedArray): TypedArrayConstructor {
-  return data instanceof Uint8Array
-    ? Uint8Array
-    : data instanceof Uint16Array
-    ? Uint16Array
-    : data instanceof Uint32Array
-    ? Uint32Array
-    : data instanceof Int8Array
-    ? Int8Array
-    : data instanceof Int16Array
-    ? Int16Array
-    : data instanceof Int32Array
-    ? Int32Array
-    : data instanceof Float32Array
-    ? Float32Array
-    : data instanceof Float64Array
-    ? Float64Array
-    : Uint8Array; // shouldn't reach "u8"
+function getDataConstructor(dtype: DataType): TypedArrayConstructor {
+  switch (dtype) {
+    case "u8":
+      return Uint8Array;
+    case "u16":
+      return Uint16Array;
+    case "u32":
+      return Uint32Array;
+    case "i8":
+      return Int8Array;
+    case "i16":
+      return Int16Array;
+    case "i32":
+      return Int16Array;
+    case "f32":
+      return Float32Array;
+    case "f64":
+      return Float64Array;
+    default:
+      return Uint8Array;
+  }
 }
 
 /**
@@ -109,7 +112,7 @@ export class Matrix<T extends TypedArray> {
   }
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<T> {
-    const resArr = new (getDataConstructor(this.data))(
+    const resArr = new (getDataConstructor(this.dtype))(
       this.nRows * this.nCols,
     ) as T;
     let i = 0;
@@ -126,7 +129,7 @@ export class Matrix<T extends TypedArray> {
   /** Get the nth column in the matrix */
   col(n: number): T {
     let i = 0;
-    const col = new (getDataConstructor(this.data))(this.nRows) as T;
+    const col = new (getDataConstructor(this.dtype))(this.nRows) as T;
     while (i < this.nRows) {
       col[i] = this.data[i * this.nCols + n];
       i += 1;
@@ -155,7 +158,9 @@ export class Matrix<T extends TypedArray> {
     return res;
   }
   /** Filter the matrix by rows */
-  filter<S extends T>(fn: (value: T, row: number, _: T[]) => value is S): Matrix<T> {
+  filter<S extends T>(
+    fn: (value: T, row: number, _: T[]) => value is S,
+  ): Matrix<T> {
     const satisfying = [];
     let i = 0;
     while (i < this.nRows) {
@@ -165,7 +170,7 @@ export class Matrix<T extends TypedArray> {
       i += 1;
     }
     const matrix = new Matrix(
-      getDataConstructor(this.data) as unknown as (new (len: number) => T),
+      getDataConstructor(this.dtype) as unknown as (new (len: number) => T),
       [satisfying.length, this.nCols],
     );
     i = 0;
@@ -185,7 +190,7 @@ export class Matrix<T extends TypedArray> {
   }
   /** Compute the sum of all rows */
   rowSum(): T {
-    const sum = new (getDataConstructor(this.data))(this.nCols) as T;
+    const sum = new (getDataConstructor(this.dtype))(this.nCols) as T;
     let i = 0;
     while (i < this.nRows) {
       let j = 0;
@@ -241,7 +246,7 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
-      const col = new (getDataConstructor(this.data))(this.nRows) as T;
+      const col = new (getDataConstructor(this.dtype))(this.nRows) as T;
       while (j < this.nRows) {
         col[j] = this.data[j * this.nCols + i];
         j += 1;
