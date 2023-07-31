@@ -1,4 +1,4 @@
-import { Image2d, Patch2d, PatchCollection } from "../types.ts";
+import { Image2d, Patch2d, PatchCollection } from "../../types.ts";
 
 /**
  * Extract patches from a 2d image.

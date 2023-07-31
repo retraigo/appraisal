@@ -1,8 +1,8 @@
 import { BaseVectorizer, preprocess } from "./base.ts";
-import { DefaultIgnoreList } from "../util.ts";
+import { DefaultIgnoreList } from "../../../utils/stop_words.ts";
+import { Matrix } from "../../../utils/matrix.ts";
 
 import type { BaseVectorizerOptions } from "./base.ts";
-import { Matrix } from "../utils/matrix.ts";
 
 export interface CountVectorizerOptions extends BaseVectorizerOptions {
   vocabulary?: Map<string, number>;

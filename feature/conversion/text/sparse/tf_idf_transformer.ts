@@ -1,4 +1,4 @@
-import { Matrix } from "../utils/matrix.ts";
+import { Matrix } from "../../../utils/matrix.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {

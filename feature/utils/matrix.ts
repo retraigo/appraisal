@@ -1,3 +1,4 @@
+type Constructor<T> = new (length: number) => T;
 type DataType =
   | "u8"
   | "u16"
@@ -49,28 +50,6 @@ function getDataType(data: TypedArray): DataType {
     ? "f64"
     : "u8"; // shouldn't reach "u8"
 }
-function getDataConstructor(dtype: DataType): TypedArrayConstructor {
-  switch (dtype) {
-    case "u8":
-      return Uint8Array;
-    case "u16":
-      return Uint16Array;
-    case "u32":
-      return Uint32Array;
-    case "i8":
-      return Int8Array;
-    case "i16":
-      return Int16Array;
-    case "i32":
-      return Int16Array;
-    case "f32":
-      return Float32Array;
-    case "f64":
-      return Float64Array;
-    default:
-      return Uint8Array;
-  }
-}
 
 /**
  * Class for Matrices
@@ -89,7 +68,7 @@ export class Matrix<T extends TypedArray> {
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
-  constructor(data: T | (new (len: number) => T), shape: [number, number]) {
+  constructor(data: T | Constructor<T>, shape: [number, number]) {
     // Check if it is an actual array
     if (ArrayBuffer.isView(data)) {
       this.data = data;
@@ -112,7 +91,7 @@ export class Matrix<T extends TypedArray> {
   }
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<T> {
-    const resArr = new (getDataConstructor(this.dtype))(
+    const resArr = new (this.data.constructor as Constructor<T>)(
       this.nRows * this.nCols,
     ) as T;
     let i = 0;
@@ -129,12 +108,37 @@ export class Matrix<T extends TypedArray> {
   /** Get the nth column in the matrix */
   col(n: number): T {
     let i = 0;
-    const col = new (getDataConstructor(this.dtype))(this.nRows) as T;
+    const col = new (this.data.constructor as Constructor<T>)(this.nRows);
+    let offset = 0;
     while (i < this.nRows) {
-      col[i] = this.data[i * this.nCols + n];
+      col[i] = this.data[offset + n];
       i += 1;
+      offset += this.nCols;
     }
     return col;
+  }
+  colMean(): T {
+    const sum = this.colSum();
+    let i = 0;
+    while (i < sum.length) {
+      sum[i] = sum[i] / this.nCols;
+      i += 1;
+    }
+    return sum;
+  }
+  /** Get a column array of all column sums in the matrix */
+  colSum(): T {
+    const sum = new (this.data.constructor as Constructor<T>)(this.nRows);
+    let i = 0;
+    while (i < this.nCols) {
+      let j = 0;
+      while (j < this.nRows) {
+        sum[j] += this.data[j * this.nCols + i];
+        j += 1;
+      }
+      i += 1;
+    }
+    return sum;
   }
   /** Get the dot product of two matrices */
   dot(rhs: Matrix<T>): number {
@@ -144,7 +148,6 @@ export class Matrix<T extends TypedArray> {
     if (rhs.nCols !== this.nCols) {
       throw new Error("Matrices must have equal cols.");
     }
-
     let res = 0;
     let j = 0;
     while (j < this.nCols) {
@@ -170,7 +173,7 @@ export class Matrix<T extends TypedArray> {
       i += 1;
     }
     const matrix = new Matrix(
-      getDataConstructor(this.dtype) as unknown as (new (len: number) => T),
+      this.data.constructor as Constructor<T>,
       [satisfying.length, this.nCols],
     );
     i = 0;
@@ -188,17 +191,28 @@ export class Matrix<T extends TypedArray> {
   row(n: number): T {
     return this.data.slice(n * this.nCols, (n + 1) * this.nCols) as T;
   }
+  rowMean(): T {
+    const sum = this.rowSum();
+    let i = 0;
+    while (i < sum.length) {
+      sum[i] = sum[i] / this.nRows;
+      i += 1;
+    }
+    return sum;
+  }
   /** Compute the sum of all rows */
   rowSum(): T {
-    const sum = new (getDataConstructor(this.dtype))(this.nCols) as T;
+    const sum = new (this.data.constructor as Constructor<T>)(this.nCols);
     let i = 0;
+    let offset = 0;
     while (i < this.nRows) {
       let j = 0;
       while (j < this.nCols) {
-        sum[j] += this.data[this.nCols * i + j];
+        sum[j] += this.data[offset + j];
         j += 1;
       }
       i += 1;
+      offset += this.nCols;
     }
     return sum;
   }
@@ -246,7 +260,7 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
-      const col = new (getDataConstructor(this.dtype))(this.nRows) as T;
+      const col = new (this.data.constructor as Constructor<T>)(this.nRows);
       while (j < this.nRows) {
         col[j] = this.data[j * this.nCols + i];
         j += 1;
