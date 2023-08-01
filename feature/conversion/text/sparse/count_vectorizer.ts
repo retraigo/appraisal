@@ -1,6 +1,6 @@
 import { BaseVectorizer, preprocess } from "./base.ts";
-import { DefaultIgnoreList } from "../../../utils/stop_words.ts";
-import { Matrix } from "../../../utils/matrix.ts";
+import { DefaultIgnoreList } from "../../../../constants/stop_words.ts";
+import { Matrix } from "../../../../utils/matrix.ts";
 
 import type { BaseVectorizerOptions } from "./base.ts";
 

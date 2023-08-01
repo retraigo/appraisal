@@ -1,6 +1,6 @@
-# Preprocess
+# Appraisal
 
-- Inspired by scikit-learn's `feature_extraction` module.
+- Extract / Convert features from Data
 
 ## Modules
 - [Count Vectorizer](/src/text/count_vectorizer.ts)
