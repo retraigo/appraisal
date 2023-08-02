@@ -42,10 +42,12 @@ export type DecayScheduler = {
 export type OneCycleScheduler = {
   /** Type of Scheduler */
   type: Scheduler.OneCycleScheduler;
-  /** The maximum value learning rate can get to */
-  max_lr: number;
-  /** Number of steps in each cycle */
-  cycle_steps: number;
+  config: {
+    /** The maximum value learning rate can get to */
+    max_lr: number;
+    /** Number of steps in each cycle */
+    cycle_steps: number;
+  };
 };
 
 export type LearningRateScheduler =
@@ -72,22 +74,24 @@ export function getLearningRate(
       return current;
     }
     case Scheduler.LinearAnnealer: {
-      return initial - step * (initial - scheduler.config.min_lr) / scheduler.config.epochs;
+      return initial -
+        step * (initial - scheduler.config.min_lr) / scheduler.config.epochs;
     }
     case Scheduler.ExponentialAnnealer: {
       return initial * Math.pow(scheduler.config.rate, step);
     }
     case Scheduler.DecayScheduler: {
-      return initial * Math.pow(scheduler.config.rate, ~~(step / scheduler.config.step_size));
+      return initial *
+        Math.pow(scheduler.config.rate, ~~(step / scheduler.config.step_size));
     }
     case Scheduler.OneCycleScheduler: {
-      const currentSteps = step % (2 * scheduler.cycle_steps);
-      if (currentSteps < scheduler.cycle_steps) {
+      const currentSteps = step % (2 * scheduler.config.cycle_steps);
+      if (currentSteps < scheduler.config.cycle_steps) {
         return initial +
-          (scheduler.max_lr - initial) * (currentSteps / scheduler.cycle_steps);
-      } else {return scheduler.max_lr -
-          (scheduler.max_lr - initial) *
-            ((currentSteps - scheduler.cycle_steps) / scheduler.cycle_steps);}
+          (scheduler.config.max_lr - initial) * (currentSteps / scheduler.config.cycle_steps);
+      } else {return scheduler.config.max_lr -
+          (scheduler.config.max_lr - initial) *
+            ((currentSteps - scheduler.config.cycle_steps) / scheduler.config.cycle_steps);}
     }
     default: {
       return current;
