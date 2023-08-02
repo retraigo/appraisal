@@ -82,6 +82,8 @@ export class Matrix<T extends TypedArray> {
       if (typeof shape[1] !== "number") {
         throw new Error("Cannot initialize with incomplete shape (n-cols)");
       }
+      this.nRows = shape[0];
+      this.nCols = shape[1];
       this.data = new data(shape[0] * shape[1]);
       this.dtype = getDataType(this.data);
     }
