@@ -6,7 +6,11 @@ export class TfIdfTransformer {
   constructor() {
     this.idf = null;
   }
-  /** Get idf matrix from tf features. */
+  /**
+   * Get idf matrix from tf features.
+   * @param data tf features from CountVectorizer
+   * @returns Tf-Idf transformer
+   */
   fit(data: Matrix<Float32Array>): TfIdfTransformer {
     const shape = {
       features: data.nCols,
@@ -26,6 +30,8 @@ export class TfIdfTransformer {
   }
   /**
    * Transform an tf features into tf-idf features.
+   * @param data tf features from CountVectorizer
+   * @returns Sparse matrix of Tf-Idf features
    */
   transform(data: Matrix<Float32Array>): Matrix<Float32Array> {
     if (this.idf === null) throw new Error("IDF not initialized yet.");

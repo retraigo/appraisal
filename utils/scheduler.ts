@@ -16,7 +16,7 @@ export type LinearAnnealer = {
   type: Scheduler.LinearAnnealer;
   config: {
     /** The lowest value learning rate can get to */
-    minLr: number;
+    min_lr: number;
     /** Total epochs */
     epochs: number;
   };
@@ -34,7 +34,7 @@ export type DecayScheduler = {
   type: Scheduler.DecayScheduler;
   config: {
     /** Number of steps for each decay */
-    stepSize: number;
+    step_size: number;
     /** Decay factor */
     rate: number;
   };
@@ -43,9 +43,9 @@ export type OneCycleScheduler = {
   /** Type of Scheduler */
   type: Scheduler.OneCycleScheduler;
   /** The maximum value learning rate can get to */
-  maxLr: number;
+  max_lr: number;
   /** Number of steps in each cycle */
-  cycleSteps: number;
+  cycle_steps: number;
 };
 
 export type LearningRateScheduler =
@@ -72,22 +72,22 @@ export function getLearningRate(
       return current;
     }
     case Scheduler.LinearAnnealer: {
-      return initial - step * (initial - scheduler.config.minLr) / scheduler.config.epochs;
+      return initial - step * (initial - scheduler.config.min_lr) / scheduler.config.epochs;
     }
     case Scheduler.ExponentialAnnealer: {
       return initial * Math.pow(scheduler.config.rate, step);
     }
     case Scheduler.DecayScheduler: {
-      return initial * Math.pow(scheduler.config.rate, ~~(step / scheduler.config.stepSize));
+      return initial * Math.pow(scheduler.config.rate, ~~(step / scheduler.config.step_size));
     }
     case Scheduler.OneCycleScheduler: {
-      const currentSteps = step % (2 * scheduler.cycleSteps);
-      if (currentSteps < scheduler.cycleSteps) {
+      const currentSteps = step % (2 * scheduler.cycle_steps);
+      if (currentSteps < scheduler.cycle_steps) {
         return initial +
-          (scheduler.maxLr - initial) * (currentSteps / scheduler.cycleSteps);
-      } else {return scheduler.maxLr -
-          (scheduler.maxLr - initial) *
-            ((currentSteps - scheduler.cycleSteps) / scheduler.cycleSteps);}
+          (scheduler.max_lr - initial) * (currentSteps / scheduler.cycle_steps);
+      } else {return scheduler.max_lr -
+          (scheduler.max_lr - initial) *
+            ((currentSteps - scheduler.cycle_steps) / scheduler.cycle_steps);}
     }
     default: {
       return current;
