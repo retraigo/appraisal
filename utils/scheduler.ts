@@ -1,9 +1,9 @@
 export enum Scheduler {
   None = "none",
-  ExponentialAnnealer = "exponential_annealer",
-  LinearAnnealer = "linear_annealer",
-  DecayScheduler = "decay_scheduler",
-  OneCycleScheduler = "one_cycle_scheduler",
+  ExponentialAnnealer = "exponentialannealer",
+  LinearAnnealer = "linearannealer",
+  DecayScheduler = "decayscheduler",
+  OneCycleScheduler = "onecyclescheduler",
 }
 
 export type NoScheduler = {
