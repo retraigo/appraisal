@@ -14,24 +14,30 @@ export type NoScheduler = {
 export type LinearAnnealer = {
   /** Type of Scheduler */
   type: Scheduler.LinearAnnealer;
-  /** The lowest value learning rate can get to */
-  minLr: number;
-  /** Total epochs */
-  epochs: number;
+  config: {
+    /** The lowest value learning rate can get to */
+    minLr: number;
+    /** Total epochs */
+    epochs: number;
+  };
 };
 export type ExponentialAnnealer = {
   /** Type of Scheduler */
   type: Scheduler.ExponentialAnnealer;
-  /** Decay factor */
-  rate: number;
+  config: {
+    /** Decay factor */
+    rate: number;
+  };
 };
 export type DecayScheduler = {
   /** Type of Scheduler */
   type: Scheduler.DecayScheduler;
-  /** Number of steps for each decay */
-  stepSize: number;
-  /** Decay factor */
-  rate: number;
+  config: {
+    /** Number of steps for each decay */
+    stepSize: number;
+    /** Decay factor */
+    rate: number;
+  };
 };
 export type OneCycleScheduler = {
   /** Type of Scheduler */
@@ -66,13 +72,13 @@ export function getLearningRate(
       return current;
     }
     case Scheduler.LinearAnnealer: {
-      return initial - step * (initial - scheduler.minLr) / scheduler.epochs;
+      return initial - step * (initial - scheduler.config.minLr) / scheduler.config.epochs;
     }
     case Scheduler.ExponentialAnnealer: {
-      return initial * Math.pow(scheduler.rate, step);
+      return initial * Math.pow(scheduler.config.rate, step);
     }
     case Scheduler.DecayScheduler: {
-      return initial * Math.pow(scheduler.rate, ~~(step / scheduler.stepSize));
+      return initial * Math.pow(scheduler.config.rate, ~~(step / scheduler.config.stepSize));
     }
     case Scheduler.OneCycleScheduler: {
       const currentSteps = step % (2 * scheduler.cycleSteps);
