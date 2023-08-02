@@ -33,7 +33,7 @@ console.log(vec2);
   <pre>
     <code>
 [
-  Float32Array(20) [
+  Float64Array(20) [
     3.386294364929199, 2.386294364929199,
     2.386294364929199,                 0,
                     0,                 0,
@@ -45,7 +45,7 @@ console.log(vec2);
                     0,                 0,
                     0,                 0
   ],
-  Float32Array(20) [
+  Float64Array(20) [
                     0,                 0,
                     0, 2.386294364929199,
     2.386294364929199, 2.386294364929199,
@@ -57,7 +57,7 @@ console.log(vec2);
                     0,                 0,
                     0,                 0
   ],
-  Float32Array(20) [
+  Float64Array(20) [
                     0,                  0,
                     0,                  0,
                     0,                  0,
@@ -69,7 +69,7 @@ console.log(vec2);
                     0,                  0,
                     0,                  0
   ],
-  Float32Array(20) [
+  Float64Array(20) [
                     0,                  0,
                     0,                  0,
                     0,                  0,

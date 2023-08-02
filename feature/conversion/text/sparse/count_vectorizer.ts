@@ -66,7 +66,7 @@ export class CountVectorizer extends BaseVectorizer {
    * Convert a document (string | array of strings) into vectors.
    * The vectors are Uint32Arrays.
    */
-  transform(text: string | string[]): Matrix<Float32Array> {
+  transform(text: string | string[]): Matrix<Float64Array> {
     if (!this.vocabulary.size) {
       throw new Error(
         "CountVectorizer vocabulary not initialized yet. Call `new CountVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
@@ -74,7 +74,7 @@ export class CountVectorizer extends BaseVectorizer {
     }
     if (Array.isArray(text)) {
       const res = new Matrix(
-        new Float32Array(text.length * this.vocabulary.size),
+        new Float64Array(text.length * this.vocabulary.size),
         [text.length, this.vocabulary.size],
       );
       let i = 0;
@@ -87,9 +87,9 @@ export class CountVectorizer extends BaseVectorizer {
       return new Matrix(this.#transform(text), [1, this.vocabulary.size]);
     }
   }
-  #transform(text: string): Float32Array {
+  #transform(text: string): Float64Array {
     text = preprocess(text, this);
-    const res = new Float32Array(this.vocabulary.size);
+    const res = new Float64Array(this.vocabulary.size);
     const words = text.split(" ");
     let i = 0;
     while (i < words.length) {

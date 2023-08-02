@@ -11,7 +11,7 @@ export class TfIdfTransformer {
    * @param data tf features from CountVectorizer
    * @returns Tf-Idf transformer
    */
-  fit(data: Matrix<Float32Array>): TfIdfTransformer {
+  fit(data: Matrix<Float64Array>): TfIdfTransformer {
     const shape = {
       features: data.nCols,
       samples: data.nRows,
@@ -33,7 +33,7 @@ export class TfIdfTransformer {
    * @param data tf features from CountVectorizer
    * @returns Sparse matrix of Tf-Idf features
    */
-  transform(data: Matrix<Float32Array>): Matrix<Float32Array> {
+  transform(data: Matrix<Float64Array>): Matrix<Float64Array> {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }
@@ -41,10 +41,10 @@ export class TfIdfTransformer {
 
 /** A very basic, low-effort multiplication. */
 export function multiplyDiags(
-  x: Matrix<Float32Array>,
+  x: Matrix<Float64Array>,
   y: Float64Array,
-): Matrix<Float32Array> {
-  const res = new Matrix(new Float32Array(x.data.length), x.shape);
+): Matrix<Float64Array> {
+  const res = new Matrix(new Float64Array(x.data.length), x.shape);
   let i = 0;
   while (i < x.nRows) {
     let j = 0;
