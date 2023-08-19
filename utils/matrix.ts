@@ -1,4 +1,5 @@
-type Constructor<T> = new (length: number) => T;
+import { Constructor, TypedArray } from "../feature/conversion/text/types.ts";
+
 type DataType =
   | "u8"
   | "u16"
@@ -10,26 +11,6 @@ type DataType =
   | "i64"
   | "f32"
   | "f64";
-
-type TypedArray =
-  | Uint8Array
-  | Uint16Array
-  | Uint32Array
-  | Int8Array
-  | Int16Array
-  | Int32Array
-  | Float32Array
-  | Float64Array;
-
-type TypedArrayConstructor =
-  | Uint8ArrayConstructor
-  | Uint16ArrayConstructor
-  | Uint32ArrayConstructor
-  | Int8ArrayConstructor
-  | Int16ArrayConstructor
-  | Int32ArrayConstructor
-  | Float32ArrayConstructor
-  | Float64ArrayConstructor;
 
 function getDataType(data: TypedArray): DataType {
   return data instanceof Uint8Array
@@ -56,7 +37,7 @@ function getDataType(data: TypedArray): DataType {
  */
 export class Matrix<T extends TypedArray> {
   /** Type of data in the matrix */
-  dtype: DataType;
+  dType: DataType;
   /** Number of rows in the matrix */
   nRows: number;
   /** Number of columns in the matrix */
@@ -73,7 +54,7 @@ export class Matrix<T extends TypedArray> {
     // Check if it is an actual array
     if (ArrayBuffer.isView(data)) {
       this.data = data;
-      this.dtype = getDataType(data);
+      this.dType = getDataType(data);
       this.nRows = shape[0];
       this.nCols = typeof shape[1] === "number"
         ? shape[1]
@@ -85,7 +66,7 @@ export class Matrix<T extends TypedArray> {
       this.nRows = shape[0];
       this.nCols = shape[1];
       this.data = new data(shape[0] * shape[1]);
-      this.dtype = getDataType(this.data);
+      this.dType = getDataType(this.data);
     }
   }
   get length(): number {
@@ -102,6 +83,7 @@ export class Matrix<T extends TypedArray> {
     ) as T;
     let i = 0;
     for (const col of this.cols()) {
+      // @ts-ignore This line will work
       resArr.set(col, i * this.nRows);
       i += 1;
     }
@@ -127,7 +109,8 @@ export class Matrix<T extends TypedArray> {
     const sum = this.colSum();
     let i = 0;
     while (i < sum.length) {
-      sum[i] = sum[i] / this.nCols;
+      // @ts-ignore This line will work
+      sum[i] = sum[i] / (typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols);
       i += 1;
     }
     return sum;
@@ -139,6 +122,7 @@ export class Matrix<T extends TypedArray> {
     while (i < this.nCols) {
       let j = 0;
       while (j < this.nRows) {
+        // @ts-ignore This line will work
         sum[j] += this.data[j * this.nCols + i];
         j += 1;
       }
@@ -147,18 +131,19 @@ export class Matrix<T extends TypedArray> {
     return sum;
   }
   /** Get the dot product of two matrices */
-  dot(rhs: Matrix<T>): number {
+  dot(rhs: Matrix<T>): number | bigint {
     if (rhs.nRows !== this.nRows) {
       throw new Error("Matrices must have equal rows.");
     }
     if (rhs.nCols !== this.nCols) {
       throw new Error("Matrices must have equal cols.");
     }
-    let res = 0;
+    let res = typeof this.data[0] === "bigint" ? 0n : 0;
     let j = 0;
     while (j < this.nCols) {
       let i = 0;
       while (i < this.nRows) {
+        // @ts-ignore This line will work
         res += this.item(i, j) * rhs.item(i, j);
         i += 1;
       }
@@ -184,13 +169,14 @@ export class Matrix<T extends TypedArray> {
     );
     i = 0;
     while (i < satisfying.length) {
+      // @ts-ignore This line will work
       matrix.setRow(i, this.row(satisfying[i]));
       i += 1;
     }
     return matrix;
   }
   /** Get an item using a row and column index */
-  item(row: number, col: number): number {
+  item(row: number, col: number): number | bigint {
     return this.data[row * this.nCols + col];
   }
   /** Get the nth row in the matrix */
@@ -201,7 +187,8 @@ export class Matrix<T extends TypedArray> {
     const sum = this.rowSum();
     let i = 0;
     while (i < sum.length) {
-      sum[i] = sum[i] / this.nRows;
+      // @ts-ignore This line will work
+      sum[i] = sum[i] / (typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows);
       i += 1;
     }
     return sum;
@@ -214,6 +201,7 @@ export class Matrix<T extends TypedArray> {
     while (i < this.nRows) {
       let j = 0;
       while (j < this.nCols) {
+        // @ts-ignore This line will work
         sum[j] += this.data[offset + j];
         j += 1;
       }
@@ -222,8 +210,12 @@ export class Matrix<T extends TypedArray> {
     }
     return sum;
   }
-  /** Add a value to an existing element */
-  setAdd(row: number, col: number, val: number) {
+  /** 
+   * Add a value to an existing element 
+   * Will throw an error if the types mismatch
+   */
+  setAdd(row: number, col: number, val: number | bigint) {
+    // @ts-expect-error Must provide appropriate number/bigint argument
     this.data[row * this.nCols + col] += val;
   }
   /** Replace a column */
@@ -240,7 +232,8 @@ export class Matrix<T extends TypedArray> {
     this.data[row * this.nCols + col] = val;
   }
   /** Replace a row */
-  setRow(row: number, val: ArrayLike<number>) {
+  setRow(row: number, val: ArrayLike<number> | ArrayLike<bigint>) {
+    // @ts-expect-error Must provide appropriate number/bigint argument
     this.data.set(val, row * this.nCols);
   }
   /** Slice matrix by rows */

@@ -1,1 +1,1 @@
-export { CountVectorizer, TfIdfTransformer } from "./conversion/text/sparse/mod.ts";
+export { TextVectorizer } from "./conversion/text/mod.ts";

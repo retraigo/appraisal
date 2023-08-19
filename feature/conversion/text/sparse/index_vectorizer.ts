@@ -6,9 +6,11 @@ import { Matrix } from "../../../../mod.ts";
 /**
  * Convert text into vectors (bag of words)
  */
-export class CountVectorizer extends BaseVectorizer {
-  constructor(options: Partial<BaseVectorizerOptions> = {}) {
+export class IndexVectorizer extends BaseVectorizer {
+  size: number | null;
+  constructor(options: Partial<BaseVectorizerOptions & { size: number }> = {}) {
     super(options);
+    this.size = options.size ?? null;
   }
   /**
    * Convert a document (string | array of strings) into vectors.
@@ -19,39 +21,41 @@ export class CountVectorizer extends BaseVectorizer {
   ): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
-        "MultiHotVectorizer vocabulary not initialized yet. Call `new MultiHotVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
+        "IndexVectorizer vocabulary not initialized yet. Call `new IndexVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
       );
     }
     if (Array.isArray(text)) {
+      const size = Math.max(...text.map((x) => this.split(x).length));
       const res = new Matrix(
-        new (getConstructor(dType))(text.length * this.vocabulary.size),
-        [text.length, this.vocabulary.size],
+        new (getConstructor(dType))(text.length * size),
+        [text.length, size],
       );
       let i = 0;
       while (i < text.length) {
-        res.setRow(i, this.#transform<T>(text[i], dType));
+        res.setRow(i, this.#transform<T>(text[i], size, dType));
         i += 1;
       }
       return res as Matrix<T>;
     } else {
-      return new Matrix(this.#transform<T>(text, dType), [
+      return new Matrix(this.#transform<T>(text, -1, dType), [
         1,
         this.vocabulary.size,
       ]);
     }
   }
-  #transform<T>(text: string, dType: DataType): T {
+  #transform<T>(text: string, size: number, dType: DataType): T {
     text = this.preprocess(text);
-    const res = new (getConstructor(dType))(this.vocabulary.size);
     const words = text.split(" ");
+    if (!size) size = words.length;
+    const res = new (getConstructor(dType))(size);
     let i = 0;
-    while (i < words.length) {
+    while (i < words.length && i < size) {
       if (this.vocabulary.has(words[i])) {
         const index = this.vocabulary.get(words[i]);
         if (typeof index === "number") {
           // @ts-ignore No error here
-          res[index] += typeof res[index] === "bigint" ? 1n : 1;
-        }
+          res[i] = typeof res[i] === "bigint" ? BigInt(index) : index;
+        } else res[i] = typeof res[i] === "bigint" ? -1n : -1;
       }
       i += 1;
     }

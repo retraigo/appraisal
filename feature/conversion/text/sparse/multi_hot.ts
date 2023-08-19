@@ -1,12 +1,14 @@
-import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
+import { BaseVectorizer } from "../base.ts";
+import { Matrix } from "../../../../utils/matrix.ts";
+
+import type { BaseVectorizerOptions } from "../base.ts";
 import { DataType, TypedArray } from "../types.ts";
 import { getConstructor } from "../../../../utils/get_constructor.ts";
-import { Matrix } from "../../../../mod.ts";
 
 /**
  * Convert text into vectors (bag of words)
  */
-export class CountVectorizer extends BaseVectorizer {
+export class MultiHotVectorizer extends BaseVectorizer {
   constructor(options: Partial<BaseVectorizerOptions> = {}) {
     super(options);
   }
@@ -34,23 +36,20 @@ export class CountVectorizer extends BaseVectorizer {
       }
       return res as Matrix<T>;
     } else {
-      return new Matrix(this.#transform<T>(text, dType), [
-        1,
-        this.vocabulary.size,
-      ]);
+      return new Matrix(this.#transform<T>(text, dType), [1, this.vocabulary.size]);
     }
   }
   #transform<T>(text: string, dType: DataType): T {
     text = this.preprocess(text);
     const res = new (getConstructor(dType))(this.vocabulary.size);
-    const words = text.split(" ");
+    const words = this.split(text);
     let i = 0;
     while (i < words.length) {
       if (this.vocabulary.has(words[i])) {
         const index = this.vocabulary.get(words[i]);
         if (typeof index === "number") {
           // @ts-ignore No error here
-          res[index] += typeof res[index] === "bigint" ? 1n : 1;
+          res[index] = typeof res[index] === "bigint" ? 1n : 1;
         }
       }
       i += 1;
