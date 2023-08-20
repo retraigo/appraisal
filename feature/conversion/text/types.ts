@@ -35,23 +35,22 @@ export type TypedArray =
 
 export type Constructor<T> = new (length: number) => T;
 
-export enum VectorizerMode {
-  Count = "count",
-  Indices = "indices",
-  MultiHot = "multihot",
-  TfIdf = "tfidf",
-}
+export type VectorizerMode =
+  | "count"
+  | "indices"
+  | "multihot"
+  | "tfidf";
 
 export type VectorizerModeConfig = {
-  mode: VectorizerMode.Count;
+  mode: "count";
   config?: Partial<BaseVectorizerOptions>;
 } | {
-  mode: VectorizerMode.Indices;
+  mode: "indices";
   config?: Partial<BaseVectorizerOptions & { size: number }>;
 } | {
-  mode: VectorizerMode.MultiHot;
+  mode: "multihot";
   config?: Partial<BaseVectorizerOptions>;
 } | {
-  mode: VectorizerMode.TfIdf;
+  mode: "tfidf";
   config?: Partial<BaseVectorizerOptions & { idf: Float64Array }>;
 };

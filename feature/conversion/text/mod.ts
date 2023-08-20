@@ -8,7 +8,6 @@ import {
 import {
   DataType,
   TypedArray,
-  VectorizerMode,
   VectorizerModeConfig,
 } from "./types.ts";
 
@@ -17,17 +16,17 @@ export class TextVectorizer {
   transformer?: TfIdfTransformer;
   constructor(config: VectorizerModeConfig) {
     switch (config.mode) {
-      case VectorizerMode.Count:
+      case "count":
         this.vectorizer = new CountVectorizer(config.config);
         break;
-      case VectorizerMode.Indices:
+      case "indices":
         // TODOL: impl indices
         this.vectorizer = new IndexVectorizer(config.config);
         break;
-      case VectorizerMode.MultiHot:
+      case "multihot":
         this.vectorizer = new MultiHotVectorizer(config.config);
         break;
-      case VectorizerMode.TfIdf:
+      case "tfidf":
         this.vectorizer = new CountVectorizer(config.config);
         this.transformer = new TfIdfTransformer(config.config);
     }
