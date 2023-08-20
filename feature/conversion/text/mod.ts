@@ -48,7 +48,7 @@ export class TextVectorizer {
   }
   fit(
     text: string | string[],
-    dType: DataType,
+    dType: DataType = "f32",
   ): this {
     this.vectorizer?.fit(text);
     if (this.transformer) {
@@ -60,7 +60,7 @@ export class TextVectorizer {
   }
   transform<T extends TypedArray>(
     text: string | string[],
-    dType: DataType,
+    dType: DataType = "f32",
   ): Matrix<T> {
     if (!this.vectorizer) {
       throw new Error("This is an empty vectorizer!");
