@@ -30,3 +30,5 @@ export interface PatchCollection extends Patch2d {
   size: number;
   data: Uint8ClampedArray;
 }
+
+export type Pixel = [number, number, number, number?];

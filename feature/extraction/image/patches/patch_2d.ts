@@ -1,4 +1,5 @@
-import { Image2d, Patch2d, PatchCollection } from "../../types.ts";
+import { Image } from "../../../../utils/image.ts";
+import { Patch2d, PatchCollection } from "../../../types.ts";
 
 /**
  * Extract patches from a 2d image.
@@ -18,7 +19,7 @@ function clamp(n: number, width: number): [number, number] {
 
 /** Private function to extract patches */
 function extract(
-  image: Image2d,
+  image: Image,
   options: Patch2d,
 ): [Uint8ClampedArray, number] {
   /** Get number of possible patches in each dimension */
@@ -64,7 +65,7 @@ function extract(
  * @returns A collection of patches as a single Uint8ClampedArray
  */
 export function patch2d(
-  image: Image2d,
+  image: Image,
   options: Patch2d,
 ): PatchCollection {
   if (image.width < options.width) {
