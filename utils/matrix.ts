@@ -1,16 +1,8 @@
-import { Constructor, TypedArray } from "../feature/conversion/text/types.ts";
-
-type DataType =
-  | "u8"
-  | "u16"
-  | "u32"
-  | "u64"
-  | "i8"
-  | "i16"
-  | "i32"
-  | "i64"
-  | "f32"
-  | "f64";
+import {
+  Constructor,
+  DataType,
+  TypedArray,
+} from "../feature/conversion/text/types.ts";
 
 function getDataType(data: TypedArray): DataType {
   return data instanceof Uint8Array
@@ -110,7 +102,8 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < sum.length) {
       // @ts-ignore This line will work
-      sum[i] = sum[i] / (typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols);
+      sum[i] = sum[i] /
+        (typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols);
       i += 1;
     }
     return sum;
@@ -188,7 +181,8 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < sum.length) {
       // @ts-ignore This line will work
-      sum[i] = sum[i] / (typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows);
+      sum[i] = sum[i] /
+        (typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows);
       i += 1;
     }
     return sum;
@@ -210,8 +204,8 @@ export class Matrix<T extends TypedArray> {
     }
     return sum;
   }
-  /** 
-   * Add a value to an existing element 
+  /**
+   * Add a value to an existing element
    * Will throw an error if the types mismatch
    */
   setAdd(row: number, col: number, val: number | bigint) {
