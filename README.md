@@ -3,9 +3,8 @@
 - Extract / Convert features from Data
 
 ## Modules
-- [Count Vectorizer](/src/text/count_vectorizer.ts)
-- [Tf-Idf Transformer](/src/text/tfidf_transformer.ts)
-- [Patch Extractor](/src/image/patch_2d.ts)
+- [Text Vectorizer](/feature/conversion/text/mod.ts)
+- [Patch Extractor](/feature/extraction/image/patch_2d.ts)
 
 ## Usage
 
@@ -17,15 +16,16 @@ const data = [
   "like a diamond in the sky",
 ];
 
-const cv = new CountVectorizer({ lowercase: true });
+const vectorizer = new TextVectorizer({
+  mode: "tfidf",
+  config: { standardize: { lowercase: true } },
+});
 
-const vec = cv.fit(data).transform(data);
+vectorizer.fit(data, "f32");
 
-const tv = new TfIdfTransformer();
+const vec = vectorizer.transform(data, "f32");
 
-const vec2 = tv.fit(vec).transform(vec);
-
-console.log(vec2);
+console.log(vec);
 ```
 
 <details> 
