@@ -4,7 +4,8 @@
 
 ## Modules
 - [Text Vectorizer](/feature/conversion/text/mod.ts)
-- [Patch Extractor](/feature/extraction/image/patch_2d.ts)
+- [Color Extractor](/feature/extraction/image/colors/mod.ts)
+- [Patch Extractor](/feature/extraction/image/patches/patch_2d.ts)
 
 ## Usage
 
