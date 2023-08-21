@@ -9,7 +9,7 @@ import { Matrix } from "../../../../mod.ts";
 export class IndexVectorizer extends BaseVectorizer {
   size: number | null;
   constructor(options: Partial<BaseVectorizerOptions & { size: number }> = {}) {
-    super(options);
+    super({ ...options, indices: true });
     this.size = options.size ?? null;
   }
   /**
@@ -48,6 +48,8 @@ export class IndexVectorizer extends BaseVectorizer {
     const words = text.split(" ");
     if (!size) size = words.length;
     const res = new (getConstructor(dType))(size);
+    // @ts-ignore idk honestly
+    res.fill(typeof res[0] === "bigint" ? BigInt(this.vocabulary.get("__pad__") || 0) : (this.vocabulary.get("__pad__") || 0));
     let i = 0;
     while (i < words.length && i < size) {
       if (this.vocabulary.has(words[i])) {
@@ -55,7 +57,15 @@ export class IndexVectorizer extends BaseVectorizer {
         if (typeof index === "number") {
           // @ts-ignore No error here
           res[i] = typeof res[i] === "bigint" ? BigInt(index) : index;
-        } else res[i] = typeof res[i] === "bigint" ? -1n : -1;
+        } else {
+          res[i] = typeof res[i] === "bigint"
+            ? BigInt(this.vocabulary.get("__unk__") || 0)
+            : (this.vocabulary.get("__unk__") || 0);
+          }
+      } else {
+        res[i] = typeof res[i] === "bigint"
+            ? BigInt(this.vocabulary.get("__unk__") || 0)
+            : (this.vocabulary.get("__unk__") || 0);
       }
       i += 1;
     }

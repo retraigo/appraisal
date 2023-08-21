@@ -35,7 +35,7 @@ export class BaseVectorizer implements BaseVectorizerOptions {
   vocabulary: Map<string, number>;
   /** An internal counter for remembering the last index in vocabulary. */
   #lastToken: Uint32Array;
-  constructor(options: Partial<BaseVectorizerOptions>) {
+  constructor(options: Partial<BaseVectorizerOptions & { indices: boolean }>) {
     this.skipWords = options.skipWords ?? false;
     this.standardize = typeof options.standardize === "function"
       ? options.standardize
@@ -46,6 +46,11 @@ export class BaseVectorizer implements BaseVectorizerOptions {
       };
     this.vocabulary = options.vocabulary ?? new Map();
     this.#lastToken = new Uint32Array(1);
+    if (options.indices && !this.vocabulary.size) {
+      this.#lastToken[0] = 2;
+      this.vocabulary.set("__pad__", 0);
+      this.vocabulary.set("__unk__", 1);
+    }
     if (this.vocabulary.size) {
       this.#lastToken[0] = this.vocabulary.size;
     }
@@ -98,6 +103,6 @@ export class BaseVectorizer implements BaseVectorizerOptions {
   }
   // TODO: Support custom split modes
   split(text: string): string[] {
-    return text.split(" ")
+    return text.split(" ");
   }
 }
