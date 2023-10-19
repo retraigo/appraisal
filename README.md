@@ -6,6 +6,7 @@
 - [Text Vectorizer](/feature/conversion/text/mod.ts)
 - [Color Extractor](/feature/extraction/image/colors/mod.ts)
 - [Patch Extractor](/feature/extraction/image/patches/patch_2d.ts)
+- [Confusion Matrix](/metrics/confusion_matrix.ts)
 
 ## Usage
 
