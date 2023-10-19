@@ -47,3 +47,6 @@ export class ConfusionMatrix {
   export function specificityScore(cMatrix: ConfusionMatrix): number {
     return cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive);
   }
+  export function f1Score(cMatrix: ConfusionMatrix): number {
+    return (2 * cMatrix.truePositive) / ((2 * cMatrix.truePositive) + cMatrix.falsePositive + cMatrix.falseNegative)
+  }
