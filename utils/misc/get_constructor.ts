@@ -1,4 +1,4 @@
-import { DataType } from "../feature/conversion/text/types.ts";
+import { DataType } from "../common_types.ts";
 
 export function getConstructor(dType: DataType) {
   switch (dType) {

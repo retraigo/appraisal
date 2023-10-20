@@ -1,4 +1,4 @@
-import { Image } from "../../../../utils/image.ts";
+import { Image } from "../../../../utils/mod.ts";
 import { Pixel } from "../../../types.ts";
 import { ColorHistogram } from "./histogram.ts";
 

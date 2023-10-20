@@ -1,9 +1,7 @@
-import { BaseVectorizer } from "../base.ts";
-import { Matrix } from "../../../../utils/matrix.ts";
-
-import type { BaseVectorizerOptions } from "../base.ts";
-import { DataType, TypedArray } from "../types.ts";
-import { getConstructor } from "../../../../utils/get_constructor.ts";
+import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
+import { DataType, TypedArray } from "../../../../utils/common_types.ts";
+import { getConstructor } from "../../../../utils/mod.ts";
+import { Matrix } from "../../../../mod.ts";
 
 /**
  * Convert text into vectors (bag of words)

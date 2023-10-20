@@ -1,6 +1,6 @@
-import { getConstructor } from "../../../../utils/get_constructor.ts";
-import { Matrix } from "../../../../utils/matrix.ts";
-import { TypedArray } from "../types.ts";
+import { TypedArray } from "../../../../utils/common_types.ts";
+import { getConstructor } from "../../../../utils/mod.ts";
+import { Matrix } from "../../../../mod.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {

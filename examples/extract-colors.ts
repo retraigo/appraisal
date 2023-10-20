@@ -2,9 +2,8 @@ import {
   createCanvas,
   loadImage,
 } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
-import { Image } from "../utils/image.ts";
-import { quantizeByMedianCut } from "../feature/extraction/image/colors/median_cut.ts";
-import { Color } from "../utils/color.ts";
+import { Image, extractColors  } from "../mod.ts";
+import { Color } from "../utils/mod.ts";
 
 const image = await loadImage("examples/kagu.png");
 
@@ -18,7 +17,7 @@ const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 const img = new Image(data);
 
-const colors = quantizeByMedianCut(img, 1, 5);
+const colors = extractColors(img, 1);
 
 const newCan = createCanvas(300, colors.length * 100);
 

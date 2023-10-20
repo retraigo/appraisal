@@ -2,7 +2,7 @@ import {
   Constructor,
   DataType,
   TypedArray,
-} from "../feature/conversion/text/types.ts";
+} from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
   return data instanceof Uint8Array

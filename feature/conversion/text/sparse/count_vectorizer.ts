@@ -1,6 +1,6 @@
 import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
-import { DataType, TypedArray } from "../types.ts";
-import { getConstructor } from "../../../../utils/get_constructor.ts";
+import { DataType, TypedArray } from "../../../../utils/common_types.ts";
+import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
 
 /**
