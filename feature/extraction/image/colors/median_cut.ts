@@ -4,6 +4,10 @@ import type { ColorRange } from "./common.ts";
 import { Pixel } from "../../../types.ts";
 import { Image } from "../../../../utils/mod.ts";
 
+/// Uses Modified Median Cut Algorithm
+/// TypeScript port of Leptonica
+/// http://www.leptonica.org/
+
 export function quantizeByMedianCut(
   image: Image,
   extractCount: number,
