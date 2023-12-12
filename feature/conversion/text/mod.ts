@@ -5,11 +5,9 @@ import {
   MultiHotVectorizer,
   TfIdfTransformer,
 } from "./sparse/mod.ts";
-import {
-  DataType,
-  TypedArray,
-  VectorizerModeConfig,
-} from "./types.ts";
+import { VectorizerModeConfig } from "./types.ts";
+
+import { DataType, TypedArray } from "../../../utils/common_types.ts";
 
 export class TextVectorizer {
   vectorizer?: CountVectorizer | MultiHotVectorizer | IndexVectorizer;
