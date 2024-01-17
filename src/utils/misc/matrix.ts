@@ -272,14 +272,21 @@ export class Matrix<T extends TypedArray> {
 
   [Symbol.for("Jupyter.display")]() {
     let res = "<table>\n";
+    res += "<thead><tr><th>idx</th>";
+    for (let i = 0; i < this.nCols; i += 1) {
+      res += `<th>${i}</th>`;
+    }
+    res += "</tr></thead>";
+    let j = 0;
     for (const row of this.rows()) {
-      res += "<tr>";
+      res += `<tr><td>${j}</td>`;
+      j += 1;
       for (const x of row) {
-        res += `<td>${x}</td>`
+        res += `<td>${x}</td>`;
       }
       res += "</tr>";
     }
-    res += "</table>"
+    res += "</table>";
     return {
       // Plain text content
       "text/plain": this.pretty,

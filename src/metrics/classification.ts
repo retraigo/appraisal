@@ -13,7 +13,7 @@ export class ClassificationReport {
     const unique = useUnique(y);
     if (unique.length <= 1) {
       throw new Error(
-        `Cannot create a classification report for less than 1 class.`,
+        `Cannot create a classification report for less than 1 class.`
       );
     }
     this.true = 0;
@@ -31,27 +31,53 @@ export class ClassificationReport {
       }
       this.true += tp + tn;
       this.false += fp + fn;
-      this.cMatrices.set(
-        `${label}`,
-        new ConfusionMatrix([tp, fn, fp, tn]),
-      );
+      this.cMatrices.set(`${label}`, new ConfusionMatrix([tp, fn, fp, tn]));
     }
   }
-  [Symbol.for("Deno.customInspect")]() {
-    let res = `Classification Report`
-    res += `\nNumber of classes:\t${this.labels.length}\n`
-    res += `\n==================\nConfusion Matrices\n==================\n`
+  toString() {
+    let res = `Classification Report`;
+    res += `\nNumber of classes:\t${this.labels.length}\n`;
+    res += `\n==================\nConfusion Matrices\n==================\n`;
     for (const [label, matrix] of this.cMatrices.entries()) {
-      res += `\nClass: ${label}`
-      res += `\n\t${matrix.labelP}\t${matrix.labelN}\n${matrix.labelP}\t${matrix.truePositive}\t${matrix.falseNegative}\n${matrix.labelN}\t${matrix.falsePositive}\t${matrix.trueNegative}`;;
-      res += `\nAccuracy: ${accuracyScore(matrix)}`
-      res += `\nPrecision: ${precisionScore(matrix)}`
-      res += `\nRecall: ${recallScore(matrix)}`
-      res += `\nSpecificity: ${specificityScore(matrix)}`
-      res += `\nF1 Score: ${f1Score(matrix)}`
-      res += `\n`
+      res += `\nClass: ${label}`;
+      res += `\n\t${matrix.labelP}\t${matrix.labelN}\n${matrix.labelP}\t${matrix.truePositive}\t${matrix.falseNegative}\n${matrix.labelN}\t${matrix.falsePositive}\t${matrix.trueNegative}`;
+      res += `\nAccuracy: ${accuracyScore(matrix)}`;
+      res += `\nPrecision: ${precisionScore(matrix)}`;
+      res += `\nRecall: ${recallScore(matrix)}`;
+      res += `\nSpecificity: ${specificityScore(matrix)}`;
+      res += `\nF1 Score: ${f1Score(matrix)}`;
+      res += `\n`;
     }
     return res;
+  }
+  toHtml() {
+    let res = `<h3>Classification Report</h3>`;
+    res += `<br>Number of classes:\t${this.labels.length}\n`;
+    res += `<h3>Confusion Matrices</h3>`;
+    for (const [label, matrix] of this.cMatrices.entries()) {
+      res += `<br><br>Class: ${label}`;
+      res += `<table>`;
+      res += `<thead><tr><th></th><th>${matrix.labelP}</th><th>${matrix.labelN}</th></tr><tr><td>${matrix.labelP}</td><td>${matrix.truePositive}</td><td>${matrix.falseNegative}</td></tr><tr><td>${matrix.labelN}</td><td>${matrix.falsePositive}</td><td>${matrix.trueNegative}</td>`;
+      res += `</table>`;
+      res += `<br>Accuracy: ${accuracyScore(matrix)}`;
+      res += `<br>Precision: ${precisionScore(matrix)}`;
+      res += `<br>Recall: ${recallScore(matrix)}`;
+      res += `<br>Specificity: ${specificityScore(matrix)}`;
+      res += `<br>F1 Score: ${f1Score(matrix)}`;
+    }
+    return res;
+  }
+  [Symbol.for("Deno.customInspect")]() {
+    return this.toString();
+  }
+  [Symbol.for("Jupyter.display")]() {
+    return {
+      // Plain text content
+      "text/plain": this.toString(),
+
+      // HTML output
+      "text/html": this.toHtml(),
+    };
   }
   /*
   [Symbol.for("Deno.customInspect")]() {
@@ -89,7 +115,7 @@ export class ConfusionMatrix {
   labelN: string;
   constructor(
     [tp, fn, fp, tn]: [number, number, number, number],
-    [label1, label2]: [string?, string?] = [],
+    [label1, label2]: [string?, string?] = []
   ) {
     this.truePositive = tp;
     this.falseNegative = fn;
@@ -114,12 +140,12 @@ export class ConfusionMatrix {
   }
   static fromResults(
     y: ArrayLike<unknown>,
-    y1: ArrayLike<unknown>,
+    y1: ArrayLike<unknown>
   ): ConfusionMatrix {
     const unique = useUnique(y);
     if (unique.length !== 2) {
       throw new Error(
-        `Cannot create confusion matrix for ${unique.length} classes. Try ClassificationReport instead.`,
+        `Cannot create confusion matrix for ${unique.length} classes. Try ClassificationReport instead.`
       );
     }
     let [tp, fn, fp, tn] = [0, 0, 0, 0];
@@ -152,7 +178,8 @@ export function specificityScore(cMatrix: ConfusionMatrix): number {
   return cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive);
 }
 export function f1Score(cMatrix: ConfusionMatrix): number {
-  return (2 * cMatrix.truePositive) /
-    ((2 * cMatrix.truePositive) + cMatrix.falsePositive +
-      cMatrix.falseNegative);
+  return (
+    (2 * cMatrix.truePositive) /
+    (2 * cMatrix.truePositive + cMatrix.falsePositive + cMatrix.falseNegative)
+  );
 }
