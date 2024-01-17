@@ -279,7 +279,7 @@ export class Matrix<T extends TypedArray> {
     res += "</tr></thead>";
     let j = 0;
     for (const row of this.rows()) {
-      res += `<tr><td>${j}</td>`;
+      res += `<tr><td><strong>${j}</strong></td>`;
       j += 1;
       for (const x of row) {
         res += `<td>${x}</td>`;
