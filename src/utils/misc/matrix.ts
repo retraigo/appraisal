@@ -1,8 +1,4 @@
-import {
-  Constructor,
-  DataType,
-  TypedArray,
-} from "../common_types.ts";
+import { Constructor, DataType, TypedArray } from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
   return data instanceof Uint8Array
@@ -48,10 +44,10 @@ export class Matrix<T extends TypedArray> {
       this.data = data;
       this.dType = getDataType(data);
       this.nRows = shape[0];
-      this.nCols = typeof shape[1] === "number"
-        ? shape[1]
-        : this.data.length / shape[0];
-    } else { // if not, construct a new one
+      this.nCols =
+        typeof shape[1] === "number" ? shape[1] : this.data.length / shape[0];
+    } else {
+      // if not, construct a new one
       if (typeof shape[1] !== "number") {
         throw new Error("Cannot initialize with incomplete shape (n-cols)");
       }
@@ -71,7 +67,7 @@ export class Matrix<T extends TypedArray> {
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<T> {
     const resArr = new (this.data.constructor as Constructor<T>)(
-      this.nRows * this.nCols,
+      this.nRows * this.nCols
     ) as T;
     let i = 0;
     for (const col of this.cols()) {
@@ -80,6 +76,15 @@ export class Matrix<T extends TypedArray> {
       i += 1;
     }
     return new Matrix(resArr, [this.nCols, this.nRows]);
+  }
+  /** Get a pretty version for printing. DO NOT USE FOR MATRICES WITH MANY COLUMNS. */
+  get pretty(): string {
+    let res = "";
+    for (const row of this.rows()) {
+      res += row.join("\t");
+      res += "\n";
+    }
+    return res;
   }
   /** Alias for row */
   at(pos: number): T {
@@ -102,7 +107,8 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < sum.length) {
       // @ts-ignore This line will work
-      sum[i] = sum[i] /
+      sum[i] =
+        sum[i] /
         (typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols);
       i += 1;
     }
@@ -146,7 +152,7 @@ export class Matrix<T extends TypedArray> {
   }
   /** Filter the matrix by rows */
   filter<S extends T>(
-    fn: (value: T, row: number, _: T[]) => value is S,
+    fn: (value: T, row: number, _: T[]) => value is S
   ): Matrix<T> {
     const satisfying = [];
     let i = 0;
@@ -156,10 +162,10 @@ export class Matrix<T extends TypedArray> {
       }
       i += 1;
     }
-    const matrix = new Matrix(
-      this.data.constructor as Constructor<T>,
-      [satisfying.length, this.nCols],
-    );
+    const matrix = new Matrix(this.data.constructor as Constructor<T>, [
+      satisfying.length,
+      this.nCols,
+    ]);
     i = 0;
     while (i < satisfying.length) {
       // @ts-ignore This line will work
@@ -181,7 +187,8 @@ export class Matrix<T extends TypedArray> {
     let i = 0;
     while (i < sum.length) {
       // @ts-ignore This line will work
-      sum[i] = sum[i] /
+      sum[i] =
+        sum[i] /
         (typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows);
       i += 1;
     }
@@ -235,9 +242,9 @@ export class Matrix<T extends TypedArray> {
     return new Matrix<T>(
       this.data.slice(
         start ? start * this.nCols : 0,
-        end ? end * this.nCols : undefined,
+        end ? end * this.nCols : undefined
       ) as T,
-      [end ? end - start : this.nRows - start, this.nCols],
+      [end ? end - start : this.nRows - start, this.nCols]
     );
   }
   /** Iterate through rows */
@@ -261,5 +268,24 @@ export class Matrix<T extends TypedArray> {
       yield col;
       i += 1;
     }
+  }
+
+  [Symbol.for("Jupyter.display")]() {
+    let res = "<table>\n";
+    for (const row of this.rows()) {
+      res += "<tr>";
+      for (const x of row) {
+        res += `<td>${x}</td>`
+      }
+      res += "</tr>";
+    }
+    res += "</table>"
+    return {
+      // Plain text content
+      "text/plain": this.pretty,
+
+      // HTML output
+      "text/html": res,
+    };
   }
 }
