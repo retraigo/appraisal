@@ -19,7 +19,7 @@ export class CountVectorizer extends BaseVectorizer {
   ): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
-        "MultiHotVectorizer vocabulary not initialized yet. Call `new MultiHotVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
+        "CountVectorizer vocabulary not initialized yet. Call `new CountVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
       );
     }
     if (Array.isArray(text)) {
