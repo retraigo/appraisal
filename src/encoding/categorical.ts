@@ -1,33 +1,38 @@
-import { Matrix } from "../mod.ts";
+import { Matrix, getConstructor } from "../mod.ts";
+import { DataType, TypedArray } from "../utils/common_types.ts";
 
 export class CategoricalEncoder<T> {
   /** Map categories to indices */
-  vocabulary: Map<T, number>;
-  /** An internal counter for remembering the last index in vocabulary. */
+  mapping: Map<T, number>;
+  /** An internal counter for remembering the last index in mapping. */
   #lastToken: Uint32Array;
   constructor() {
-    this.vocabulary = new Map();
-    this.#lastToken = new Uint32Array(0);
+    this.mapping = new Map();
+    this.#lastToken = new Uint32Array(1);
   }
-  /** Construct a vocabulary from a given set of text. */
+  /** Construct a mapping from a given set of text. */
   fit(targets: T[]): this {
     let i = 0;
     while (i < targets.length) {
-      if (!this.vocabulary.has(targets[i])) {
+      if (!this.mapping.has(targets[i])) {
         const token = this.#incrementToken();
-        this.vocabulary.set(targets[i], token);
+        console.log(token);
+        this.mapping.set(targets[i], token);
       }
       i += 1;
     }
     return this;
   }
   /** One-hot encoding of categorical values */
-  transform(targets: T[]): Matrix<Uint8Array> {
-    const res = new Matrix(Uint8Array, [this.#lastToken[0], targets.length]);
+  transform<DT extends TypedArray>(targets: T[], dType: DataType): Matrix<DT> {
+    const data = new (getConstructor(dType))(this.#lastToken[0] * targets.length)
+    const res = new Matrix<DT>(data as DT, [
+      this.#lastToken[0]
+    ]);
     let i = 0;
     while (i < targets.length) {
-      const index = this.vocabulary.get(targets[i]);
-      if (!index) {
+      const index = this.mapping.get(targets[i]);
+      if (index !== 0 && !index) {
         i += 1;
         continue;
       }
