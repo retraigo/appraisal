@@ -16,7 +16,6 @@ export class CategoricalEncoder<T> {
     while (i < targets.length) {
       if (!this.mapping.has(targets[i])) {
         const token = this.#incrementToken();
-        console.log(token);
         this.mapping.set(targets[i], token);
       }
       i += 1;
