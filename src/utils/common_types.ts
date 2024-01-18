@@ -52,6 +52,25 @@ type TypedArrayValueMapping = {
 export type DTypeValue<T extends keyof TypedArrayValueMapping> =
   T extends keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
 
+type AddableTypes = number | bigint;
+
+export type AddDTypeValues<
+  T1 extends AddableTypes,
+  T2 extends AddableTypes
+> = T1 extends number
+  ? T2 extends number
+    ? number
+    : T2 extends bigint
+    ? bigint
+    : never
+  : T1 extends bigint
+  ? T2 extends number
+    ? bigint
+    : T2 extends bigint
+    ? bigint
+    : never
+  : never;
+
 export type DType<T extends keyof TypedArrayMapping> =
   T extends keyof TypedArrayMapping ? TypedArrayMapping[T] : never;
 

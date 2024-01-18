@@ -4,6 +4,7 @@ import {
   DType,
   DTypeConstructor,
   DTypeValue,
+  AddDTypeValues
 } from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
@@ -131,8 +132,8 @@ export class Matrix<T extends DataType> {
     while (i < this.nCols) {
       let j = 0;
       while (j < this.nRows) {
-        // @ts-ignore This line will work
-        sum[j] += this.data[j * this.nCols + i];
+        // @ts-ignore I'll fix this later
+        sum[j] = sum[j] + this.item(j, i) as AddDTypeValues<DTypeValue<T>, DTypeValue<T>>;
         j += 1;
       }
       i += 1;
@@ -147,13 +148,14 @@ export class Matrix<T extends DataType> {
     if (rhs.nCols !== this.nCols) {
       throw new Error("Matrices must have equal cols.");
     }
-    let res = typeof this.data[0] === "bigint" ? 0n : 0;
+    let res = (typeof this.data[0] === "bigint" ? 0n : 0) as DTypeValue<T>;
     let j = 0;
     while (j < this.nCols) {
       let i = 0;
       while (i < this.nRows) {
-        // @ts-ignore This line will work
-        res += this.item(i, j) * rhs.item(i, j);
+        const adder = (this.item(i, j) as DTypeValue<T>) * (rhs.item(i, j) as DTypeValue<T>);
+        // @ts-ignore I'll fix this later
+        res += adder as DTypeValue<T>
         i += 1;
       }
       j += 1;
@@ -185,8 +187,8 @@ export class Matrix<T extends DataType> {
     return matrix;
   }
   /** Get an item using a row and column index */
-  item(row: number, col: number): number | bigint {
-    return this.data[row * this.nCols + col];
+  item(row: number, col: number): DTypeValue<T> {
+    return this.data[row * this.nCols + col] as DTypeValue<T>;
   }
   /** Get the nth row in the matrix */
   row(n: number): DType<T> {
