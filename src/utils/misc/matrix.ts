@@ -1,4 +1,10 @@
-import { Constructor, DataType, TypedArray } from "../common_types.ts";
+import {
+  DataType,
+  TypedArray,
+  DType,
+  DTypeConstructor,
+  DTypeValue,
+} from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
   return data instanceof Uint8Array
@@ -23,7 +29,7 @@ function getDataType(data: TypedArray): DataType {
 /**
  * Class for Matrices
  */
-export class Matrix<T extends TypedArray> {
+export class Matrix<T extends DataType> {
   /** Type of data in the matrix */
   dType: DataType;
   /** Number of rows in the matrix */
@@ -31,13 +37,13 @@ export class Matrix<T extends TypedArray> {
   /** Number of columns in the matrix */
   nCols: number;
   /** Raw 1D TypedArray supplied */
-  data: T;
+  data: DType<T>;
   /**
    * Create a matrix from a typed array
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
-  constructor(data: T | Constructor<T>, shape: [number, number?]) {
+  constructor(data: DType<T> | DTypeConstructor<T>, shape: [number, number?]) {
     this.nRows = this.nCols = 0;
     // Check if it is an actual array
     if (ArrayBuffer.isView(data)) {
@@ -53,7 +59,7 @@ export class Matrix<T extends TypedArray> {
       }
       this.nRows = shape[0];
       this.nCols = shape[1];
-      this.data = new data(shape[0] * shape[1]);
+      this.data = new data(shape[0] * shape[1]) as DType<T>;
       this.dType = getDataType(this.data);
     }
   }
@@ -66,9 +72,9 @@ export class Matrix<T extends TypedArray> {
   }
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<T> {
-    const resArr = new (this.data.constructor as Constructor<T>)(
+    const resArr = new (this.data.constructor as DTypeConstructor<T>)(
       this.nRows * this.nCols
-    ) as T;
+    ) as DType<T>;
     let i = 0;
     for (const col of this.cols()) {
       // @ts-ignore This line will work
@@ -87,13 +93,15 @@ export class Matrix<T extends TypedArray> {
     return res;
   }
   /** Alias for row */
-  at(pos: number): T {
+  at(pos: number): DType<T> {
     return this.row(pos);
   }
   /** Get the nth column in the matrix */
-  col(n: number): T {
+  col(n: number): DType<T> {
     let i = 0;
-    const col = new (this.data.constructor as Constructor<T>)(this.nRows);
+    const col = new (this.data.constructor as DTypeConstructor<T>)(
+      this.nRows
+    ) as DType<T>;
     let offset = 0;
     while (i < this.nRows) {
       col[i] = this.data[offset + n];
@@ -102,21 +110,23 @@ export class Matrix<T extends TypedArray> {
     }
     return col;
   }
-  colMean(): T {
+  colMean(): DType<T> {
     const sum = this.colSum();
     let i = 0;
+    const divisor = (
+      typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols
+    ) as DTypeValue<T>;
     while (i < sum.length) {
-      // @ts-ignore This line will work
-      sum[i] =
-        sum[i] /
-        (typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols);
+      sum[i] = (sum[i] as DTypeValue<T>) / divisor;
       i += 1;
     }
     return sum;
   }
   /** Get a column array of all column sums in the matrix */
-  colSum(): T {
-    const sum = new (this.data.constructor as Constructor<T>)(this.nRows);
+  colSum(): DType<T> {
+    const sum = new (this.data.constructor as DTypeConstructor<T>)(
+      this.nRows
+    ) as DType<T>;
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
@@ -151,8 +161,8 @@ export class Matrix<T extends TypedArray> {
     return res;
   }
   /** Filter the matrix by rows */
-  filter<S extends T>(
-    fn: (value: T, row: number, _: T[]) => value is S
+  filter<S extends DType<T>>(
+    fn: (value: DType<T>, row: number, _: T[]) => value is S
   ): Matrix<T> {
     const satisfying = [];
     let i = 0;
@@ -162,7 +172,7 @@ export class Matrix<T extends TypedArray> {
       }
       i += 1;
     }
-    const matrix = new Matrix(this.data.constructor as Constructor<T>, [
+    const matrix = new Matrix(this.data.constructor as DTypeConstructor<T>, [
       satisfying.length,
       this.nCols,
     ]);
@@ -179,24 +189,26 @@ export class Matrix<T extends TypedArray> {
     return this.data[row * this.nCols + col];
   }
   /** Get the nth row in the matrix */
-  row(n: number): T {
-    return this.data.slice(n * this.nCols, (n + 1) * this.nCols) as T;
+  row(n: number): DType<T> {
+    return this.data.slice(n * this.nCols, (n + 1) * this.nCols) as DType<T>;
   }
-  rowMean(): T {
+  rowMean(): DType<T> {
     const sum = this.rowSum();
     let i = 0;
+    const divisor = (
+      typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows
+    ) as DTypeValue<T>;
     while (i < sum.length) {
-      // @ts-ignore This line will work
-      sum[i] =
-        sum[i] /
-        (typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows);
+      sum[i] = (sum[i] as DTypeValue<T>) / divisor;
       i += 1;
     }
     return sum;
   }
   /** Compute the sum of all rows */
-  rowSum(): T {
-    const sum = new (this.data.constructor as Constructor<T>)(this.nCols);
+  rowSum(): DType<T> {
+    const sum = new (this.data.constructor as DTypeConstructor<T>)(
+      this.nCols
+    ) as DType<T>;
     let i = 0;
     let offset = 0;
     while (i < this.nRows) {
@@ -243,24 +255,26 @@ export class Matrix<T extends TypedArray> {
       this.data.slice(
         start ? start * this.nCols : 0,
         end ? end * this.nCols : undefined
-      ) as T,
+      ) as DType<T>,
       [end ? end - start : this.nRows - start, this.nCols]
     );
   }
   /** Iterate through rows */
-  *rows(): Generator<T> {
+  *rows(): Generator<DType<T>> {
     let i = 0;
     while (i < this.nRows) {
-      yield this.data.slice(i * this.nCols, (i + 1) * this.nCols) as T;
+      yield this.data.slice(i * this.nCols, (i + 1) * this.nCols) as DType<T>;
       i += 1;
     }
   }
   /** Iterate through columns */
-  *cols(): Generator<T> {
+  *cols(): Generator<DType<T>> {
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
-      const col = new (this.data.constructor as Constructor<T>)(this.nRows);
+      const col = new (this.data.constructor as DTypeConstructor<T>)(
+        this.nRows
+      ) as DType<T>;
       while (j < this.nRows) {
         col[j] = this.data[j * this.nCols + i];
         j += 1;
