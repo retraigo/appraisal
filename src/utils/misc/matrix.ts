@@ -4,7 +4,8 @@ import {
   DType,
   DTypeConstructor,
   DTypeValue,
-  AddDTypeValues
+  AddDTypeValues,
+  Sliceable
 } from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
@@ -30,7 +31,7 @@ function getDataType(data: TypedArray): DataType {
 /**
  * Class for Matrices
  */
-export class Matrix<T extends DataType> {
+export class Matrix<T extends DataType> implements Sliceable {
   /** Type of data in the matrix */
   dType: DataType;
   /** Number of rows in the matrix */
@@ -163,8 +164,8 @@ export class Matrix<T extends DataType> {
     return res;
   }
   /** Filter the matrix by rows */
-  filter<S extends DType<T>>(
-    fn: (value: DType<T>, row: number, _: T[]) => value is S
+  filter(
+    fn: (value: DType<T>, row: number, _: DType<T>[]) => boolean
   ): Matrix<T> {
     const satisfying = [];
     let i = 0;

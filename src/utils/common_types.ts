@@ -92,3 +92,11 @@ export type TypedArray =
   | Float64Array;
 
 export type Constructor<T> = new (length: number) => T;
+
+export interface Sliceable {
+  filter(
+    predicate: (value: unknown, index: number, array: unknown[]) => value is unknown,
+  ): Sliceable;
+  slice(start?: number, end?: number): Sliceable;
+  length: number;
+}

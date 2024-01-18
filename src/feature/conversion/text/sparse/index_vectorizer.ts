@@ -1,7 +1,8 @@
 import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
-import { DataType, TypedArray } from "../../../../utils/common_types.ts";
+import { DataType } from "../../../../utils/common_types.ts";
 import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
+import { DType } from "../../../../utils/common_types.ts";
 
 /**
  * Convert text into vectors (bag of words)
@@ -15,7 +16,7 @@ export class IndexVectorizer extends BaseVectorizer {
   /**
    * Convert a document (string | array of strings) into vectors.
    */
-  transform<T extends TypedArray>(
+  transform<T extends DataType>(
     text: string | string[],
     dType: DataType,
   ): Matrix<T> {
@@ -43,7 +44,7 @@ export class IndexVectorizer extends BaseVectorizer {
       ]);
     }
   }
-  #transform<T>(text: string, size: number, dType: DataType): T {
+  #transform<T extends DataType>(text: string, size: number, dType: DataType): DType<T> {
     text = this.preprocess(text);
     const words = text.split(" ");
     if (!size) size = words.length;
@@ -69,6 +70,6 @@ export class IndexVectorizer extends BaseVectorizer {
       }
       i += 1;
     }
-    return res as T;
+    return res as DType<T>;
   }
 }

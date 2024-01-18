@@ -1,4 +1,4 @@
-import { TypedArray } from "../../../../utils/common_types.ts";
+import { DataType } from "../../../../utils/common_types.ts";
 import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
 
@@ -13,7 +13,7 @@ export class TfIdfTransformer {
    * @param data tf features from CountVectorizer
    * @returns Tf-Idf transformer
    */
-  fit<T extends TypedArray>(data: Matrix<T>): TfIdfTransformer {
+  fit<T extends DataType>(data: Matrix<T>): TfIdfTransformer {
     const shape = {
       features: data.nCols,
       samples: data.nRows,
@@ -35,14 +35,14 @@ export class TfIdfTransformer {
    * @param data tf features from CountVectorizer
    * @returns Sparse matrix of Tf-Idf features
    */
-  transform<T extends TypedArray>(data: Matrix<T>): Matrix<T> {
+  transform<T extends DataType>(data: Matrix<T>): Matrix<T> {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }
 }
 
 /** A very basic, low-effort multiplication. */
-export function multiplyDiags<T extends TypedArray>(
+export function multiplyDiags<T extends DataType>(
   x: Matrix<T>,
   y: Float64Array,
 ): Matrix<T> {

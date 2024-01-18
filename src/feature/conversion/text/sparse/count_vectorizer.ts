@@ -1,5 +1,5 @@
 import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
-import { DataType, TypedArray } from "../../../../utils/common_types.ts";
+import { DType, DataType } from "../../../../utils/common_types.ts";
 import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
 
@@ -13,7 +13,7 @@ export class CountVectorizer extends BaseVectorizer {
   /**
    * Convert a document (string | array of strings) into vectors.
    */
-  transform<T extends TypedArray>(
+  transform<T extends DataType>(
     text: string | string[],
     dType: DataType,
   ): Matrix<T> {
@@ -40,7 +40,7 @@ export class CountVectorizer extends BaseVectorizer {
       ]);
     }
   }
-  #transform<T>(text: string, dType: DataType): T {
+  #transform<T extends DataType>(text: string, dType: DataType): DType<T> {
     text = this.preprocess(text);
     const res = new (getConstructor(dType))(this.vocabulary.size);
     const words = text.split(" ");
@@ -55,6 +55,6 @@ export class CountVectorizer extends BaseVectorizer {
       }
       i += 1;
     }
-    return res as T;
+    return res as DType<T>;
   }
 }

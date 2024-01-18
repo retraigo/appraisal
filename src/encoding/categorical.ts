@@ -1,5 +1,5 @@
 import { Matrix, getConstructor } from "../mod.ts";
-import { DataType, TypedArray } from "../utils/common_types.ts";
+import { DType, DataType } from "../utils/common_types.ts";
 
 export class CategoricalEncoder<T> {
   /** Map categories to indices */
@@ -23,11 +23,11 @@ export class CategoricalEncoder<T> {
     return this;
   }
   /** One-hot encoding of categorical values */
-  transform<DT extends TypedArray>(targets: T[], dType: DataType): Matrix<DT> {
+  transform<DT extends DataType>(targets: T[], dType: DataType): Matrix<DT> {
     const data = new (getConstructor(dType))(
       this.#lastToken[0] * targets.length
     );
-    const res = new Matrix<DT>(data as DT, [targets.length]);
+    const res = new Matrix<DT>(data as DType<DT>, [targets.length]);
     let i = 0;
     while (i < targets.length) {
       const index = this.mapping.get(targets[i]);
@@ -40,7 +40,7 @@ export class CategoricalEncoder<T> {
     }
     return res;
   }
-  untransform<DT extends TypedArray>(data: Matrix<DT>): T[] {
+  untransform<DT extends DataType>(data: Matrix<DT>): T[] {
     const res = new Array(data.nRows);
     for (let i = 0; i < res.length; i += 1) {
       const idx = data.row(i).findIndex((x) => x === 1);

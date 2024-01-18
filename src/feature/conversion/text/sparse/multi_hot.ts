@@ -1,7 +1,8 @@
 import { BaseVectorizer, type BaseVectorizerOptions } from "../base.ts";
-import { DataType, TypedArray } from "../../../../utils/common_types.ts";
+import { DataType } from "../../../../utils/common_types.ts";
 import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
+import { DType } from "../../../../utils/common_types.ts";
 
 /**
  * Convert text into vectors (bag of words)
@@ -13,7 +14,7 @@ export class MultiHotVectorizer extends BaseVectorizer {
   /**
    * Convert a document (string | array of strings) into vectors.
    */
-  transform<T extends TypedArray>(
+  transform<T extends DataType>(
     text: string | string[],
     dType: DataType,
   ): Matrix<T> {
@@ -37,7 +38,7 @@ export class MultiHotVectorizer extends BaseVectorizer {
       return new Matrix(this.#transform<T>(text, dType), [1, this.vocabulary.size]);
     }
   }
-  #transform<T>(text: string, dType: DataType): T {
+  #transform<T extends DataType>(text: string, dType: DataType): DType<T> {
     text = this.preprocess(text);
     const res = new (getConstructor(dType))(this.vocabulary.size);
     const words = this.split(text);
@@ -52,6 +53,6 @@ export class MultiHotVectorizer extends BaseVectorizer {
       }
       i += 1;
     }
-    return res as T;
+    return res as DType<T>;
   }
 }

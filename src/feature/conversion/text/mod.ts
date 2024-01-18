@@ -7,7 +7,7 @@ import {
 } from "./sparse/mod.ts";
 import { VectorizerModeConfig } from "./types.ts";
 
-import { DataType, TypedArray } from "../../../utils/common_types.ts";
+import { DataType } from "../../../utils/common_types.ts";
 
 export class TextVectorizer {
   vectorizer?: CountVectorizer | MultiHotVectorizer | IndexVectorizer;
@@ -56,7 +56,7 @@ export class TextVectorizer {
     }
     return this;
   }
-  transform<T extends TypedArray>(
+  transform<T extends DataType>(
     text: string | string[],
     dType: DataType = "f32",
   ): Matrix<T> {
