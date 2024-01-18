@@ -1,5 +1,13 @@
 import { useUnique } from "../utils/mod.ts";
 
+type Report = {
+  c: ConfusionMatrix;
+  precision: number;
+  recall: number;
+  f1: number;
+  support: number;
+};
+
 export class ClassificationReport {
   /** Number of elements classified correctly */
   true: number;
@@ -8,7 +16,7 @@ export class ClassificationReport {
   /** Total number of elements */
   size: number;
   labels: string[];
-  cMatrices: Map<string, ConfusionMatrix>;
+  reports: Map<string, Report>;
   constructor(y: ArrayLike<unknown>, y1: ArrayLike<unknown>) {
     const unique = useUnique(y);
     if (unique.length <= 1) {
@@ -20,7 +28,7 @@ export class ClassificationReport {
     this.false = 0;
     this.size = y.length;
     this.labels = unique.map((x) => `${x}`);
-    this.cMatrices = new Map();
+    this.reports = new Map();
     for (const label of unique) {
       let [tp, fn, fp, tn] = [0, 0, 0, 0];
       for (let i = 0; i < y.length; i += 1) {
@@ -31,40 +39,34 @@ export class ClassificationReport {
       }
       this.true += tp + tn;
       this.false += fp + fn;
-      this.cMatrices.set(`${label}`, new ConfusionMatrix([tp, fn, fp, tn]));
+      const cMatrix = new ConfusionMatrix([tp, fn, fp, tn]);
+      this.reports.set(`${label}`, {
+        c: cMatrix,
+        precision: precisionScore(cMatrix),
+        f1: f1Score(cMatrix),
+        recall: recallScore(cMatrix),
+        support: cMatrix.truePositive + cMatrix.falseNegative,
+      });
     }
   }
   toString() {
     let res = `Classification Report`;
     res += `\nNumber of classes:\t${this.labels.length}\n`;
-    res += `\n==================\nConfusion Matrices\n==================\n`;
-    for (const [label, matrix] of this.cMatrices.entries()) {
-      res += `\nClass: ${label}`;
-      res += `\n\t${matrix.labelP}\t${matrix.labelN}\n${matrix.labelP}\t${matrix.truePositive}\t${matrix.falseNegative}\n${matrix.labelN}\t${matrix.falsePositive}\t${matrix.trueNegative}`;
-      res += `\nAccuracy: ${accuracyScore(matrix)}`;
-      res += `\nPrecision: ${precisionScore(matrix)}`;
-      res += `\nRecall: ${recallScore(matrix)}`;
-      res += `\nSpecificity: ${specificityScore(matrix)}`;
-      res += `\nF1 Score: ${f1Score(matrix)}`;
-      res += `\n`;
+    res += `Class\tPreci\tF1\tRec\tSup`;
+    for (const [label, report] of this.reports.entries()) {
+      res += `\n${label}`;
+      res += `\t${report.precision}\t${report.f1}\t${report.recall}\t${report.support}`;
     }
+    res += `\nAccuracy\t\t${this.true / (this.true + this.false)}\t${this.size}`
     return res;
   }
   toHtml() {
-    let res = `<h3>Classification Report</h3>`;
-    res += `<br>Number of classes:\t${this.labels.length}\n`;
-    res += `<h3>Confusion Matrices</h3>`;
-    for (const [label, matrix] of this.cMatrices.entries()) {
-      res += `<br><br>Class: ${label}`;
-      res += `<table>`;
-      res += `<thead><tr><th></th><th>${matrix.labelP}</th><th>${matrix.labelN}</th></tr><tr><td>${matrix.labelP}</td><td>${matrix.truePositive}</td><td>${matrix.falseNegative}</td></tr><tr><td>${matrix.labelN}</td><td>${matrix.falsePositive}</td><td>${matrix.trueNegative}</td>`;
-      res += `</table>`;
-      res += `<br>Accuracy: ${accuracyScore(matrix)}`;
-      res += `<br>Precision: ${precisionScore(matrix)}`;
-      res += `<br>Recall: ${recallScore(matrix)}`;
-      res += `<br>Specificity: ${specificityScore(matrix)}`;
-      res += `<br>F1 Score: ${f1Score(matrix)}`;
+    let res = `<table><thead><tr><th>Class</th><th>Precision</th><th>F1Score</th><th>Recall</th><th>Support</th></tr></thead>`;
+    for (const [label, report] of this.reports.entries()) {
+      res += `<tr><td>Class ${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
     }
+    res += `<tr><td>Accuracy</td><td></td><td>${this.true / (this.true + this.false)}</td><td>${this.size}</td></tr>`
+    res += `</table>`;
     return res;
   }
   [Symbol.for("Deno.customInspect")]() {
@@ -77,6 +79,16 @@ export class ClassificationReport {
 
       // HTML output
       "text/html": this.toHtml(),
+    };
+  }
+  toJson() {
+    const reports = Array.from(this.reports.entries());
+    return {
+      class: reports.map((x) => x[0]),
+      precision: reports.map((x) => x[1].precision),
+      f1: reports.map((x) => x[1].f1),
+      recall: reports.map((x) => x[1].recall),
+      support: reports.map((x) => x[1].support),
     };
   }
   /*
