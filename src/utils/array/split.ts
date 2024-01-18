@@ -6,9 +6,9 @@ interface SplitOptions {
   shuffle?: boolean;
 }
 /** Split arrays by their first axis */
-export function useSplit(
+export function useSplit<T extends Sliceable[]>(
   options: SplitOptions = { ratio: [7, 3], shuffle: false },
-  ...arr: (Sliceable)[]
+  ...arr: T
 ): [typeof arr, typeof arr] {
   if (!arr.every((x) => x.length === arr[0].length)) {
     throw new Error("All arrays must have equal length!");
@@ -16,7 +16,7 @@ export function useSplit(
   const { ratio, shuffle } = options;
   const idx = Math.floor(arr[0].length * (ratio[0] / (ratio[0] + ratio[1])));
   if (!shuffle) {
-    return [arr.map((x) => x.slice(0, idx)), arr.map((x) => x.slice(idx))];
+    return [arr.map((x) => x.slice(0, idx)), arr.map((x) => x.slice(idx))] as [T, T];
   } else {
     const shuffled = useShuffle(0, arr[0].length);
     const x1 = shuffled.slice(0, idx);
