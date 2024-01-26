@@ -29,7 +29,9 @@ function getDataType(data: TypedArray): DataType {
 }
 
 /**
- * Class for Matrices
+ * Class for 2D Arrays.
+ * This is not akin to a mathematical Matrix (a collection of column vectors).
+ * This is a collection of row vectors.
  */
 export class Matrix<T extends DataType> implements Sliceable {
   /** Type of data in the matrix */
@@ -167,7 +169,7 @@ export class Matrix<T extends DataType> implements Sliceable {
   filter(
     fn: (value: DType<T>, row: number, _: DType<T>[]) => boolean
   ): Matrix<T> {
-    const satisfying = [];
+    const satisfying: number[] = [];
     let i = 0;
     while (i < this.nRows) {
       if (fn(this.row(i), i, [])) {
