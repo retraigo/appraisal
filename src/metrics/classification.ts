@@ -63,9 +63,9 @@ export class ClassificationReport {
   toHtml() {
     let res = `<table><thead><tr><th>Class</th><th>Precision</th><th>F1Score</th><th>Recall</th><th>Support</th></tr></thead>`;
     for (const [label, report] of this.reports.entries()) {
-      res += `<tr><td>Class ${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
+      res += `<tr><td>${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
     }
-    res += `<tr><td>Accuracy</td><td></td><td>${this.true / (this.true + this.false)}</td><td>${this.size}</td></tr>`
+    res += `<tr><td>Accuracy</td><td></td><td></td><td>${this.true / (this.true + this.false)}</td><td>${this.size}</td></tr>`
     res += `</table>`;
     return res;
   }
