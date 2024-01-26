@@ -1,5 +1,5 @@
 import { Matrix, getConstructor } from "../mod.ts";
-import { DType, DataType } from "../utils/common_types.ts";
+import { DType, DTypeValue, DataType } from "../utils/common_types.ts";
 
 export class CategoricalEncoder<T> {
   /** Map categories to indices */
@@ -58,5 +58,36 @@ export class CategoricalEncoder<T> {
   }
   #incrementToken(): number {
     return Atomics.add(this.#lastToken, 0, 1);
+  }
+  /**
+   * Convert softmax outputs into categorical outputs
+   * This method mutates the original matrix.
+   * @returns The modified matrix.
+   */
+  static fromSoftmax<DT extends DataType>(data: Matrix<DT>): Matrix<DT> {
+    let i = 0;
+    for (let i = 0; i < data.nRows; i += 1) {
+      const max = data
+        .row(i)
+        // @ts-ignore It can reduce.
+        .reduce(
+          (acc: number, curr: DTypeValue<DT>, i: number, arr: DType<DT>) =>
+            arr[acc] > curr ? acc : i,
+          0
+        );
+      if (
+        data.data instanceof BigInt64Array ||
+        data.data instanceof BigUint64Array
+      ) {
+        const newR = new Array(data.nCols).fill(0n);
+        newR[max] = 1n;
+        data.setRow(i, newR);
+      } else {
+        const newR = new Array(data.nCols).fill(0);
+        newR[max] = 1;
+        data.setRow(i, newR);
+      }
+    }
+    return data;
   }
 }
