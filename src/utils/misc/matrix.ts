@@ -5,7 +5,7 @@ import {
   DTypeConstructor,
   DTypeValue,
   AddDTypeValues,
-  Sliceable
+  Sliceable,
 } from "../common_types.ts";
 
 function getDataType(data: TypedArray): DataType {
@@ -66,6 +66,26 @@ export class Matrix<T extends DataType> implements Sliceable {
       this.data = new data(shape[0] * shape[1]) as DType<T>;
       this.dType = getDataType(this.data);
     }
+  }
+  /** Convert the Matrix into a HTML table */
+  get html(): string {
+    let res = "<table>\n";
+    res += "<thead><tr><th>idx</th>";
+    for (let i = 0; i < this.nCols; i += 1) {
+      res += `<th>${i}</th>`;
+    }
+    res += "</tr></thead>";
+    let j = 0;
+    for (const row of this.rows()) {
+      res += `<tr><td><strong>${j}</strong></td>`;
+      j += 1;
+      for (const x of row) {
+        res += `<td>${x}</td>`;
+      }
+      res += "</tr>";
+    }
+    res += "</table>";
+    return res;
   }
   get length(): number {
     return this.nRows;
@@ -136,7 +156,10 @@ export class Matrix<T extends DataType> implements Sliceable {
       let j = 0;
       while (j < this.nRows) {
         // @ts-ignore I'll fix this later
-        sum[j] = sum[j] + this.item(j, i) as AddDTypeValues<DTypeValue<T>, DTypeValue<T>>;
+        sum[j] = (sum[j] + this.item(j, i)) as AddDTypeValues<
+          DTypeValue<T>,
+          DTypeValue<T>
+        >;
         j += 1;
       }
       i += 1;
@@ -156,9 +179,11 @@ export class Matrix<T extends DataType> implements Sliceable {
     while (j < this.nCols) {
       let i = 0;
       while (i < this.nRows) {
-        const adder = (this.item(i, j) as DTypeValue<T>) * (rhs.item(i, j) as DTypeValue<T>);
+        const adder =
+          (this.item(i, j) as DTypeValue<T>) *
+          (rhs.item(i, j) as DTypeValue<T>);
         // @ts-ignore I'll fix this later
-        res += adder as DTypeValue<T>
+        res += adder as DTypeValue<T>;
         i += 1;
       }
       j += 1;
@@ -290,28 +315,12 @@ export class Matrix<T extends DataType> implements Sliceable {
   }
 
   [Symbol.for("Jupyter.display")]() {
-    let res = "<table>\n";
-    res += "<thead><tr><th>idx</th>";
-    for (let i = 0; i < this.nCols; i += 1) {
-      res += `<th>${i}</th>`;
-    }
-    res += "</tr></thead>";
-    let j = 0;
-    for (const row of this.rows()) {
-      res += `<tr><td><strong>${j}</strong></td>`;
-      j += 1;
-      for (const x of row) {
-        res += `<td>${x}</td>`;
-      }
-      res += "</tr>";
-    }
-    res += "</table>";
     return {
       // Plain text content
       "text/plain": this.pretty,
 
       // HTML output
-      "text/html": res,
+      "text/html": this.html,
     };
   }
 }
