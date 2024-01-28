@@ -16,7 +16,7 @@ export class MultiHotVectorizer extends BaseVectorizer {
    */
   transform<T extends DataType>(
     text: string | string[],
-    dType: DataType,
+    dType: T,
   ): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
@@ -38,7 +38,7 @@ export class MultiHotVectorizer extends BaseVectorizer {
       return new Matrix(this.#transform<T>(text, dType), [1, this.vocabulary.size]);
     }
   }
-  #transform<T extends DataType>(text: string, dType: DataType): DType<T> {
+  #transform<T extends DataType>(text: string, dType: T): DType<T> {
     text = this.preprocess(text);
     const res = new (getConstructor(dType))(this.vocabulary.size);
     const words = this.split(text);

@@ -18,7 +18,7 @@ export class IndexVectorizer extends BaseVectorizer {
    */
   transform<T extends DataType>(
     text: string | string[],
-    dType: DataType,
+    dType: T,
   ): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
@@ -44,7 +44,7 @@ export class IndexVectorizer extends BaseVectorizer {
       ]);
     }
   }
-  #transform<T extends DataType>(text: string, size: number, dType: DataType): DType<T> {
+  #transform<T extends DataType>(text: string, size: number, dType: T): DType<T> {
     text = this.preprocess(text);
     const words = text.split(" ");
     if (!size) size = words.length;

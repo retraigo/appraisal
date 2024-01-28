@@ -37,17 +37,16 @@ export class TextVectorizer {
       const idx = vocab.get(word);
       if (typeof idx !== "number") {
         throw new Error(
-          "This is never supposed to happen. If it does, open an issue.",
+          "This is never supposed to happen. If it does, open an issue."
         );
       }
       res[idx] = word;
     }
     return res;
   }
-  fit(
-    text: string | string[],
-    dType: DataType = "f32",
-  ): this {
+  fit(text: string | string[]): this;
+  fit<T extends DataType>(text: string | string[], dType: T): this;
+  fit(text: string | string[], dType = "f32"): this {
     this.vectorizer?.fit(text);
     if (this.transformer) {
       // @ts-ignore If transformer exists, vectorizer will exist
@@ -56,14 +55,16 @@ export class TextVectorizer {
     }
     return this;
   }
-  transform<T extends DataType>(
+  transform(text: string | string[]): Matrix<"f32">;
+  transform<T extends DataType>(text: string | string[], dType: T): Matrix<T>;
+  transform<T extends DataType = "f32">(
     text: string | string[],
-    dType: DataType = "f32",
+    dType?: T
   ): Matrix<T> {
     if (!this.vectorizer) {
       throw new Error("This is an empty vectorizer!");
     }
-    const vec = this.vectorizer.transform<T>(text, dType);
+    const vec = this.vectorizer.transform<T>(text, dType || ("f32" as T));
     if (this.transformer) {
       return this.transformer.transform(vec);
     }

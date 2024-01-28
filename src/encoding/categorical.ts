@@ -23,7 +23,7 @@ export class CategoricalEncoder<T> {
     return this;
   }
   /** One-hot encoding of categorical values */
-  transform<DT extends DataType>(targets: T[], dType: DataType): Matrix<DT> {
+  transform<DT extends DataType>(targets: T[], dType: DT): Matrix<DT> {
     const data = new (getConstructor(dType))(
       this.#lastToken[0] * targets.length
     );
