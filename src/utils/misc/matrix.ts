@@ -1,57 +1,40 @@
-// THIS CLASS IS DEPRECATED
-// WILL BE REMOVED IN v1.0.0
-
 import {
   DataType,
-  TypedArray,
+  getDataType,
   DType,
   DTypeConstructor,
   DTypeValue,
   AddDTypeValues,
   Sliceable,
 } from "../common_types.ts";
-
-function getDataType(data: TypedArray): DataType {
-  return data instanceof Uint8Array
-    ? "u8"
-    : data instanceof Uint16Array
-    ? "u16"
-    : data instanceof Uint32Array
-    ? "u32"
-    : data instanceof Int8Array
-    ? "i8"
-    : data instanceof Int16Array
-    ? "i16"
-    : data instanceof Int32Array
-    ? "i32"
-    : data instanceof Float32Array
-    ? "f32"
-    : data instanceof Float64Array
-    ? "f64"
-    : "u8"; // shouldn't reach "u8"
-}
+import { getConstructor } from "./mod.ts";
 
 /**
- * (DEPRECATED)
  * Class for 2D Arrays.
  * This is not akin to a mathematical Matrix (a collection of column vectors).
  * This is a collection of row vectors.
  */
-export class Matrix<T extends DataType> implements Sliceable {
+export class Matrix<DT extends DataType> implements Sliceable {
   /** Type of data in the matrix */
-  dType: DataType;
+  dType: DT;
   /** Number of rows in the matrix */
   nRows: number;
   /** Number of columns in the matrix */
   nCols: number;
   /** Raw 1D TypedArray supplied */
-  data: DType<T>;
+  data: DType<DT>;
   /**
    * Create a matrix from a typed array
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
-  constructor(data: DType<T> | DTypeConstructor<T>, shape: [number, number?]) {
+  constructor(array: DTypeValue<DT>[][], config: { dType: DT });
+  constructor(data: DType<DT>, config: { shape: [number, number?] });
+  constructor(dType: DT, config: { shape: [number, number] });
+  constructor(
+    data: DTypeValue<DT>[][] | DType<DT> | DT,
+    { shape, dType }: { shape: [number, number]; dType: DT }
+  ) {
     this.nRows = this.nCols = 0;
     // Check if it is an actual array
     if (ArrayBuffer.isView(data)) {
@@ -60,23 +43,31 @@ export class Matrix<T extends DataType> implements Sliceable {
       this.nRows = shape[0];
       this.nCols =
         typeof shape[1] === "number" ? shape[1] : this.data.length / shape[0];
-    } else {
+    } else if (typeof data === "string") {
       // if not, construct a new one
       if (typeof shape[1] !== "number") {
         throw new Error("Cannot initialize with incomplete shape (n-cols)");
       }
       this.nRows = shape[0];
       this.nCols = shape[1];
-      this.data = new data(shape[0] * shape[1]) as DType<T>;
-      this.dType = getDataType(this.data);
+      this.data = new (getConstructor(data))(shape[0] * shape[1]) as DType<DT>;
+      this.dType = data;
+    } else if (Array.isArray(data)) {
+      this.nRows = data.length;
+      this.nCols = data[0].length;
+      // @ts-ignore a
+      this.data = getConstructor(dType).from(data.flat(2));
+      this.dType = dType;
+    } else {
+      throw new Error("No overload matches your call for `new Matrix()`.");
     }
   }
   /** Convert the Matrix into a HTML table */
   get html(): string {
     let res = "<table>\n";
-    res += "<thead><tr><th>idx</th>";
+    res += "<thead><tr><DTh>idx</th>";
     for (let i = 0; i < this.nCols; i += 1) {
-      res += `<th>${i}</th>`;
+      res += `<DTh>${i}</th>`;
     }
     res += "</tr></thead>";
     let j = 0;
@@ -99,17 +90,17 @@ export class Matrix<T extends DataType> implements Sliceable {
     return [this.nRows, this.nCols];
   }
   /** Get the transpose of the matrix. This method clones the matrix. */
-  get T(): Matrix<T> {
-    const resArr = new (this.data.constructor as DTypeConstructor<T>)(
+  get T(): Matrix<DT> {
+    const resArr = new (this.data.constructor as DTypeConstructor<DT>)(
       this.nRows * this.nCols
-    ) as DType<T>;
+    ) as DType<DT>;
     let i = 0;
     for (const col of this.cols()) {
       // @ts-ignore This line will work
       resArr.set(col, i * this.nRows);
       i += 1;
     }
-    return new Matrix(resArr, [this.nCols, this.nRows]);
+    return new Matrix(resArr, { shape: [this.nCols, this.nRows] });
   }
   /** Get a pretty version for printing. DO NOT USE FOR MATRICES WITH MANY COLUMNS. */
   get pretty(): string {
@@ -121,15 +112,15 @@ export class Matrix<T extends DataType> implements Sliceable {
     return res;
   }
   /** Alias for row */
-  at(pos: number): DType<T> {
+  at(pos: number): DType<DT> {
     return this.row(pos);
   }
   /** Get the nth column in the matrix */
-  col(n: number): DType<T> {
+  col(n: number): DType<DT> {
     let i = 0;
-    const col = new (this.data.constructor as DTypeConstructor<T>)(
+    const col = new (this.data.constructor as DTypeConstructor<DT>)(
       this.nRows
-    ) as DType<T>;
+    ) as DType<DT>;
     let offset = 0;
     while (i < this.nRows) {
       col[i] = this.data[offset + n];
@@ -138,31 +129,31 @@ export class Matrix<T extends DataType> implements Sliceable {
     }
     return col;
   }
-  colMean(): DType<T> {
+  colMean(): DType<DT> {
     const sum = this.colSum();
     let i = 0;
     const divisor = (
       typeof this.data[0] === "bigint" ? BigInt(this.nCols) : this.nCols
-    ) as DTypeValue<T>;
+    ) as DTypeValue<DT>;
     while (i < sum.length) {
-      sum[i] = (sum[i] as DTypeValue<T>) / divisor;
+      sum[i] = (sum[i] as DTypeValue<DT>) / divisor;
       i += 1;
     }
     return sum;
   }
   /** Get a column array of all column sums in the matrix */
-  colSum(): DType<T> {
-    const sum = new (this.data.constructor as DTypeConstructor<T>)(
+  colSum(): DType<DT> {
+    const sum = new (this.data.constructor as DTypeConstructor<DT>)(
       this.nRows
-    ) as DType<T>;
+    ) as DType<DT>;
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
       while (j < this.nRows) {
         // @ts-ignore I'll fix this later
         sum[j] = (sum[j] + this.item(j, i)) as AddDTypeValues<
-          DTypeValue<T>,
-          DTypeValue<T>
+          DTypeValue<DT>,
+          DTypeValue<DT>
         >;
         j += 1;
       }
@@ -171,23 +162,23 @@ export class Matrix<T extends DataType> implements Sliceable {
     return sum;
   }
   /** Get the dot product of two matrices */
-  dot(rhs: Matrix<T>): number | bigint {
+  dot(rhs: Matrix<DT>): number | bigint {
     if (rhs.nRows !== this.nRows) {
       throw new Error("Matrices must have equal rows.");
     }
     if (rhs.nCols !== this.nCols) {
       throw new Error("Matrices must have equal cols.");
     }
-    let res = (typeof this.data[0] === "bigint" ? 0n : 0) as DTypeValue<T>;
+    let res = (typeof this.data[0] === "bigint" ? 0n : 0) as DTypeValue<DT>;
     let j = 0;
     while (j < this.nCols) {
       let i = 0;
       while (i < this.nRows) {
         const adder =
-          (this.item(i, j) as DTypeValue<T>) *
-          (rhs.item(i, j) as DTypeValue<T>);
+          (this.item(i, j) as DTypeValue<DT>) *
+          (rhs.item(i, j) as DTypeValue<DT>);
         // @ts-ignore I'll fix this later
-        res += adder as DTypeValue<T>;
+        res += adder as DTypeValue<DT>;
         i += 1;
       }
       j += 1;
@@ -196,8 +187,8 @@ export class Matrix<T extends DataType> implements Sliceable {
   }
   /** Filter the matrix by rows */
   filter(
-    fn: (value: DType<T>, row: number, _: DType<T>[]) => boolean
-  ): Matrix<T> {
+    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean
+  ): Matrix<DT> {
     const satisfying: number[] = [];
     let i = 0;
     while (i < this.nRows) {
@@ -206,10 +197,9 @@ export class Matrix<T extends DataType> implements Sliceable {
       }
       i += 1;
     }
-    const matrix = new Matrix(this.data.constructor as DTypeConstructor<T>, [
-      satisfying.length,
-      this.nCols,
-    ]);
+    const matrix = new Matrix(this.dType, {
+      shape: [satisfying.length, this.nCols],
+    });
     i = 0;
     while (i < satisfying.length) {
       // @ts-ignore This line will work
@@ -219,30 +209,30 @@ export class Matrix<T extends DataType> implements Sliceable {
     return matrix;
   }
   /** Get an item using a row and column index */
-  item(row: number, col: number): DTypeValue<T> {
-    return this.data[row * this.nCols + col] as DTypeValue<T>;
+  item(row: number, col: number): DTypeValue<DT> {
+    return this.data[row * this.nCols + col] as DTypeValue<DT>;
   }
   /** Get the nth row in the matrix */
-  row(n: number): DType<T> {
-    return this.data.slice(n * this.nCols, (n + 1) * this.nCols) as DType<T>;
+  row(n: number): DType<DT> {
+    return this.data.slice(n * this.nCols, (n + 1) * this.nCols) as DType<DT>;
   }
-  rowMean(): DType<T> {
+  rowMean(): DType<DT> {
     const sum = this.rowSum();
     let i = 0;
     const divisor = (
       typeof this.data[0] === "bigint" ? BigInt(this.nRows) : this.nRows
-    ) as DTypeValue<T>;
+    ) as DTypeValue<DT>;
     while (i < sum.length) {
-      sum[i] = (sum[i] as DTypeValue<T>) / divisor;
+      sum[i] = (sum[i] as DTypeValue<DT>) / divisor;
       i += 1;
     }
     return sum;
   }
   /** Compute the sum of all rows */
-  rowSum(): DType<T> {
-    const sum = new (this.data.constructor as DTypeConstructor<T>)(
+  rowSum(): DType<DT> {
+    const sum = new (this.data.constructor as DTypeConstructor<DT>)(
       this.nCols
-    ) as DType<T>;
+    ) as DType<DT>;
     let i = 0;
     let offset = 0;
     while (i < this.nRows) {
@@ -284,31 +274,31 @@ export class Matrix<T extends DataType> implements Sliceable {
     this.data.set(val, row * this.nCols);
   }
   /** Slice matrix by rows */
-  slice(start = 0, end?: number): Matrix<T> {
-    return new Matrix<T>(
+  slice(start = 0, end?: number): Matrix<DT> {
+    return new Matrix<DT>(
       this.data.slice(
         start ? start * this.nCols : 0,
         end ? end * this.nCols : undefined
-      ) as DType<T>,
-      [end ? end - start : this.nRows - start, this.nCols]
+      ) as DType<DT>,
+      { shape: [end ? end - start : this.nRows - start, this.nCols] }
     );
   }
   /** Iterate through rows */
-  *rows(): Generator<DType<T>> {
+  *rows(): Generator<DType<DT>> {
     let i = 0;
     while (i < this.nRows) {
-      yield this.data.slice(i * this.nCols, (i + 1) * this.nCols) as DType<T>;
+      yield this.data.slice(i * this.nCols, (i + 1) * this.nCols) as DType<DT>;
       i += 1;
     }
   }
   /** Iterate through columns */
-  *cols(): Generator<DType<T>> {
+  *cols(): Generator<DType<DT>> {
     let i = 0;
     while (i < this.nCols) {
       let j = 0;
-      const col = new (this.data.constructor as DTypeConstructor<T>)(
+      const col = new (this.data.constructor as DTypeConstructor<DT>)(
         this.nRows
-      ) as DType<T>;
+      ) as DType<DT>;
       while (j < this.nRows) {
         col[j] = this.data[j * this.nCols + i];
         j += 1;
