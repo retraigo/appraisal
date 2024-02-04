@@ -1,3 +1,6 @@
+// THIS CLASS IS DEPRECATED
+// WILL BE REMOVED IN v1.0.0
+
 import {
   DataType,
   TypedArray,
@@ -29,6 +32,7 @@ function getDataType(data: TypedArray): DataType {
 }
 
 /**
+ * (DEPRECATED)
  * Class for 2D Arrays.
  * This is not akin to a mathematical Matrix (a collection of column vectors).
  * This is a collection of row vectors.
