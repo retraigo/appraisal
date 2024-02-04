@@ -2,6 +2,7 @@ import {
   DataType,
   DType,
   DTypeValue,
+  getDataType,
   Sliceable,
 } from "../common_types.ts";
 import { getConstructor } from "./get_constructor.ts";
@@ -14,6 +15,11 @@ export enum Order {
   T4 = 4,
   T5 = 5,
 }
+
+export type TensorLike<DT extends DataType, O extends Order> = {
+  data: DType<DT>;
+  shape: Shape<O>;
+};
 
 export type Shape<N extends number> = N extends 0
   ? []
@@ -42,7 +48,9 @@ function getShape<O extends Order, DT extends DataType>(
 /**
  * A Tensor of order O.
  */
-export class Tensor<DT extends DataType, O extends Order> implements Sliceable {
+export class Tensor<DT extends DataType, O extends Order>
+  implements Sliceable, TensorLike<DT, O>
+{
   order: O;
   shape: Shape<O>;
   data: DType<DT>;
@@ -66,30 +74,44 @@ export class Tensor<DT extends DataType, O extends Order> implements Sliceable {
         this.shape = shape;
         this.order = shape.length as O;
         this.dType = data;
+        this.strides = Tensor.getStrides(this.shape);
       }
     } else if (Array.isArray(data)) {
-      this.shape = getShape(data);
       if (!dType)
         throw new Error(
           `Expected dType to be defined when using a normal array. Got ${dType}.`
         );
       else {
+        this.shape = getShape(data);
+        this.order = this.shape.length as O;
         // @ts-ignore They're mapped correctly
         this.data = getConstructor(dType).from(
           data.flat(this.shape.length) as DTypeValue<DT>[]
         ) as DType<DT>;
         this.dType = dType;
+        this.strides = Tensor.getStrides(this.shape);
       }
+    } else if (ArrayBuffer.isView(data)) {
+      if (!shape)
+        throw new Error(
+          `Shape must be defined when Tensor is constructed from a TypedArray.`
+        );
+      this.shape = shape;
+      this.order = this.shape.length as O;
+      this.data = data;
+      this.dType = getDataType(data);
+      this.strides = Tensor.getStrides(this.shape);
+    } else {
+      throw new Error("Tensor initialization does not follow any overload.");
     }
-    this.strides = Tensor.getStrides(this.shape);
   }
+  /** For compat with useSplit() */
   get length(): number {
-    return this.data.length;
+    return this.shape[0];
   }
-  /** Filter the tensor by any axis */
+  /** Filter the tensor by 0th axis */
   filter(
-    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean,
-    axis = 0
+    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean
   ): Tensor<DT, O> {
     const satisfying: number[] = [];
     let i = 0;
@@ -145,6 +167,23 @@ export class Tensor<DT extends DataType, O extends Order> implements Sliceable {
     }
     return res;
   }
+  toJSON() {
+    return {
+      // @ts-ignore I have no idea why TS is doing this
+      data: Array.from(this.data) as DTypeValue<DT>[],
+      shape: this.shape,
+    };
+  }
+  /** Iterate along the first axis */
+  *iter(): Generator<DType<DT>> {
+    let i = 0;
+    const stride = this.strides[0]
+    while (i < this.data.length) {
+      yield this.data.slice(i * stride, (i + 1) * stride) as DType<DT>;
+      i += 1;
+    }
+  }
+
   static getStrides<O extends Order>(shape: Shape<O>): Shape<O> {
     const strides = new Array(shape.length).fill(1);
     for (let i = 0; i < shape.length; i += 1) {

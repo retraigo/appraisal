@@ -95,8 +95,34 @@ export type Constructor<T> = new (length: number) => T;
 
 export interface Sliceable {
   filter(
-    predicate: (value: unknown, index: number, array: unknown[]) => value is unknown,
+    predicate: (
+      value: unknown,
+      index: number,
+      array: unknown[]
+    ) => value is unknown
   ): Sliceable;
   slice(start?: number, end?: number): Sliceable;
   length: number;
+}
+
+export function getDataType<DT extends DataType>(data: DType<DT>): DT {
+  return (
+    data instanceof Uint8Array
+      ? "u8"
+      : data instanceof Uint16Array
+      ? "u16"
+      : data instanceof Uint32Array
+      ? "u32"
+      : data instanceof Int8Array
+      ? "i8"
+      : data instanceof Int16Array
+      ? "i16"
+      : data instanceof Int32Array
+      ? "i32"
+      : data instanceof Float32Array
+      ? "f32"
+      : data instanceof Float64Array
+      ? "f64"
+      : "u8"
+  ) as DT; // shouldn't reach "u8"
 }
