@@ -24,10 +24,9 @@ export class CategoricalEncoder<T> {
   }
   /** One-hot encoding of categorical values */
   transform<DT extends DataType>(targets: T[], dType: DT): Matrix<DT> {
-    const data = new (getConstructor(dType))(
-      this.#lastToken[0] * targets.length
-    );
-    const res = new Matrix<DT>(data as DType<DT>, [targets.length]);
+    const res = new Matrix<DT>(dType, {
+      shape: [targets.length, this.#lastToken[0]],
+    });
     let i = 0;
     while (i < targets.length) {
       const index = this.mapping.get(targets[i]);
@@ -65,7 +64,6 @@ export class CategoricalEncoder<T> {
    * @returns The modified matrix.
    */
   static fromSoftmax<DT extends DataType>(data: Matrix<DT>): Matrix<DT> {
-    let i = 0;
     for (let i = 0; i < data.nRows; i += 1) {
       const max = data
         .row(i)

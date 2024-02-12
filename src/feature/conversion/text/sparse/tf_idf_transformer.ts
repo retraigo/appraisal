@@ -1,6 +1,6 @@
 import { DataType } from "../../../../utils/common_types.ts";
-import { getConstructor } from "../../../../utils/mod.ts";
 import { Matrix } from "../../../../mod.ts";
+import { multiplyDiags } from "../../../../utils/math.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {
@@ -39,27 +39,4 @@ export class TfIdfTransformer {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }
-}
-
-/** A very basic, low-effort multiplication. */
-export function multiplyDiags<T extends DataType>(
-  x: Matrix<T>,
-  y: Float64Array,
-): Matrix<T> {
-  const res = new Matrix(new (getConstructor(x.dType))(x.data.length), x.shape);
-  let i = 0;
-  while (i < x.nRows) {
-    let j = 0;
-    while (j < y.length) {
-      res.setCell(
-        i,
-        j,
-        // @ts-ignore This line will work
-        x.item(i, j) * (typeof res[0] === "bigint" ? BigInt(y[j]) : y[j]),
-      );
-      j += 1;
-    }
-    i += 1;
-  }
-  return res as Matrix<T>;
 }

@@ -16,21 +16,17 @@ export class IndexVectorizer extends BaseVectorizer {
   /**
    * Convert a document (string | array of strings) into vectors.
    */
-  transform<T extends DataType>(
-    text: string | string[],
-    dType: T,
-  ): Matrix<T> {
+  transform<T extends DataType>(text: string | string[], dType: T): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
-        "IndexVectorizer vocabulary not initialized yet. Call `new IndexVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
+        "IndexVectorizer vocabulary not initialized yet. Call `new IndexVectorizer()` with a custom vocabulary or use `.fit()` on an array of text."
       );
     }
     if (Array.isArray(text)) {
       const size = Math.max(...text.map((x) => this.split(x).length));
-      const res = new Matrix(
-        new (getConstructor(dType))(text.length * size),
-        [text.length, size],
-      );
+      const res = new Matrix(dType, {
+        shape: [text.length, size],
+      });
       let i = 0;
       while (i < text.length) {
         res.setRow(i, this.#transform<T>(text[i], size, dType));
@@ -38,19 +34,26 @@ export class IndexVectorizer extends BaseVectorizer {
       }
       return res as Matrix<T>;
     } else {
-      return new Matrix(this.#transform<T>(text, -1, dType), [
-        1,
-        this.vocabulary.size,
-      ]);
+      return new Matrix(this.#transform<T>(text, -1, dType), {
+        shape: [1],
+      });
     }
   }
-  #transform<T extends DataType>(text: string, size: number, dType: T): DType<T> {
+  #transform<T extends DataType>(
+    text: string,
+    size: number,
+    dType: T
+  ): DType<T> {
     text = this.preprocess(text);
     const words = text.split(" ");
     if (!size) size = words.length;
     const res = new (getConstructor(dType))(size);
-    // @ts-ignore idk honestly
-    res.fill(typeof res[0] === "bigint" ? BigInt(this.vocabulary.get("__pad__") || 0) : (this.vocabulary.get("__pad__") || 0));
+    res.fill(
+      // @ts-ignore idk honestly
+      typeof res[0] === "bigint"
+        ? BigInt(this.vocabulary.get("__pad__") || 0)
+        : this.vocabulary.get("__pad__") || 0
+    );
     let i = 0;
     while (i < words.length && i < size) {
       if (this.vocabulary.has(words[i])) {
@@ -59,14 +62,16 @@ export class IndexVectorizer extends BaseVectorizer {
           // @ts-ignore No error here
           res[i] = typeof res[i] === "bigint" ? BigInt(index) : index;
         } else {
-          res[i] = typeof res[i] === "bigint"
-            ? BigInt(this.vocabulary.get("__unk__") || 0)
-            : (this.vocabulary.get("__unk__") || 0);
-          }
+          res[i] =
+            typeof res[i] === "bigint"
+              ? BigInt(this.vocabulary.get("__unk__") || 0)
+              : this.vocabulary.get("__unk__") || 0;
+        }
       } else {
-        res[i] = typeof res[i] === "bigint"
+        res[i] =
+          typeof res[i] === "bigint"
             ? BigInt(this.vocabulary.get("__unk__") || 0)
-            : (this.vocabulary.get("__unk__") || 0);
+            : this.vocabulary.get("__unk__") || 0;
       }
       i += 1;
     }

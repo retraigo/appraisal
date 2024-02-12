@@ -13,20 +13,16 @@ export class CountVectorizer extends BaseVectorizer {
   /**
    * Convert a document (string | array of strings) into vectors.
    */
-  transform<T extends DataType>(
-    text: string | string[],
-    dType: T,
-  ): Matrix<T> {
+  transform<T extends DataType>(text: string | string[], dType: T): Matrix<T> {
     if (!this.vocabulary.size) {
       throw new Error(
-        "CountVectorizer vocabulary not initialized yet. Call `new CountVectorizer()` with a custom vocabulary or use `.fit()` on an array of text.",
+        "CountVectorizer vocabulary not initialized yet. Call `new CountVectorizer()` with a custom vocabulary or use `.fit()` on an array of text."
       );
     }
     if (Array.isArray(text)) {
-      const res = new Matrix(
-        new (getConstructor(dType))(text.length * this.vocabulary.size),
-        [text.length, this.vocabulary.size],
-      );
+      const res = new Matrix(dType, {
+        shape: [text.length, this.vocabulary.size],
+      });
       let i = 0;
       while (i < text.length) {
         res.setRow(i, this.#transform<T>(text[i], dType));
@@ -34,10 +30,9 @@ export class CountVectorizer extends BaseVectorizer {
       }
       return res as Matrix<T>;
     } else {
-      return new Matrix(this.#transform<T>(text, dType), [
-        1,
-        this.vocabulary.size,
-      ]);
+      return new Matrix(this.#transform<T>(text, dType), {
+        shape: [1, this.vocabulary.size],
+      });
     }
   }
   #transform<T extends DataType>(text: string, dType: T): DType<T> {
