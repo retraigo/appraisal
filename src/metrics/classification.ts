@@ -57,7 +57,9 @@ export class ClassificationReport {
       res += `\n${label}`;
       res += `\t${report.precision}\t${report.f1}\t${report.recall}\t${report.support}`;
     }
-    res += `\nAccuracy\t\t${this.true / (this.true + this.false)}\t${this.size}`
+    res += `\nAccuracy\t\t${this.true / (this.true + this.false)}\t${
+      this.size
+    }`;
     return res;
   }
   toHtml() {
@@ -65,7 +67,9 @@ export class ClassificationReport {
     for (const [label, report] of this.reports.entries()) {
       res += `<tr><td>${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
     }
-    res += `<tr><td>Accuracy</td><td></td><td></td><td>${this.true / (this.true + this.false)}</td><td>${this.size}</td></tr>`
+    res += `<tr><td>Accuracy</td><td></td><td></td><td>${
+      this.true / (this.true + this.false)
+    }</td><td>${this.size}</td></tr>`;
     res += `</table>`;
     return res;
   }
@@ -194,4 +198,14 @@ export function f1Score(cMatrix: ConfusionMatrix): number {
     (2 * cMatrix.truePositive) /
     (2 * cMatrix.truePositive + cMatrix.falsePositive + cMatrix.falseNegative)
   );
+}
+
+export function cohensKappa(cMatrix: ConfusionMatrix): number {
+  const actualAgreement = accuracyScore(cMatrix);
+  const expectedAgreement =
+    ((cMatrix.truePositive + cMatrix.falsePositive) / cMatrix.size) *
+      ((cMatrix.truePositive + cMatrix.falseNegative) / cMatrix.size) +
+    ((cMatrix.falsePositive + cMatrix.trueNegative) / cMatrix.size) *
+      ((cMatrix.falseNegative + cMatrix.trueNegative) / cMatrix.size);
+  return (actualAgreement - expectedAgreement) / (1 - expectedAgreement);
 }
