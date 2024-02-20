@@ -5,7 +5,6 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
-  tensor1D,
   tensor2D,
 } from "https://deno.land/x/netsaur@0.3.0/mod.ts";
 
@@ -15,11 +14,9 @@ import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
 import {
   // Metrics
   ClassificationReport,
-  Matrix,
   // Split the dataset
   useSplit,
 } from "../../mod.ts";
-import { Tensor } from "../../src/utils/misc/tensor.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
