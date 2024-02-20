@@ -49,7 +49,7 @@ export class ClassificationReport {
       });
     }
   }
-  toString() {
+  toString(): string {
     let res = `Classification Report`;
     res += `\nNumber of classes:\t${this.labels.length}\n`;
     res += `Class\tPreci\tF1\tRec\tSup`;
@@ -62,7 +62,7 @@ export class ClassificationReport {
     }`;
     return res;
   }
-  toHtml() {
+  toHtml(): string {
     let res = `<table><thead><tr><th>Class</th><th>Precision</th><th>F1Score</th><th>Recall</th><th>Support</th></tr></thead>`;
     for (const [label, report] of this.reports.entries()) {
       res += `<tr><td>${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
@@ -73,10 +73,10 @@ export class ClassificationReport {
     res += `</table>`;
     return res;
   }
-  [Symbol.for("Deno.customInspect")]() {
+  [Symbol.for("Deno.customInspect")](): string {
     return this.toString();
   }
-  [Symbol.for("Jupyter.display")]() {
+  [Symbol.for("Jupyter.display")](): Record<string, string>  {
     return {
       // Plain text content
       "text/plain": this.toString(),
@@ -85,7 +85,13 @@ export class ClassificationReport {
       "text/html": this.toHtml(),
     };
   }
-  toJson() {
+  toJson(): {
+    class: string[];
+    precision: number[];
+    f1: number[];
+    recall: number[];
+    support: number[];
+  } {
     const reports = Array.from(this.reports.entries());
     return {
       class: reports.map((x) => x[0]),
@@ -151,7 +157,7 @@ export class ConfusionMatrix {
       this.trueNegative,
     ];
   }
-  [Symbol.for("Deno.customInspect")]() {
+  [Symbol.for("Deno.customInspect")](): string {
     return `\n\t${this.labelP}\t${this.labelN}\n${this.labelP}\t${this.truePositive}\t${this.falseNegative}\n${this.labelN}\t${this.falsePositive}\t${this.trueNegative}`;
   }
   static fromResults(

@@ -256,7 +256,7 @@ export class Matrix<DT extends DataType> implements Sliceable {
     this.data[row * this.nCols + col] += val;
   }
   /** Replace a column */
-  setCol(col: number, val: ArrayLike<number>) {
+  setCol(col: number, val: ArrayLike<number>): number {
     let i = 0;
     while (i < this.nRows) {
       this.data[i * this.nCols + col] = val[i];
@@ -308,7 +308,7 @@ export class Matrix<DT extends DataType> implements Sliceable {
     }
   }
 
-  [Symbol.for("Jupyter.display")]() {
+  [Symbol.for("Jupyter.display")](): Record<string, string> {
     return {
       // Plain text content
       "text/plain": this.pretty,
