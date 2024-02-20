@@ -1,4 +1,4 @@
-import { Matrix, getConstructor } from "../mod.ts";
+import { Matrix } from "../mod.ts";
 import { DType, DTypeValue, DataType } from "../utils/common_types.ts";
 
 export class CategoricalEncoder<T> {
