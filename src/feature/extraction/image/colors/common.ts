@@ -1,5 +1,5 @@
 import { Image } from "../../../../utils/mod.ts";
-import { Pixel } from "../../../types.ts";
+import { Pixel } from "../../../../utils/common_types.ts";
 import { ColorHistogram } from "./histogram.ts";
 
 export function getAverageColor(

@@ -1,7 +1,7 @@
 import { ColorHistogram, getHistogram } from "./histogram.ts";
 import { getAverageColor, getColorRange } from "./common.ts";
 import type { ColorRange } from "./common.ts";
-import { Pixel } from "../../../types.ts";
+import { Pixel } from "../../../../utils/common_types.ts";
 import { Image } from "../../../../utils/mod.ts";
 
 /// Uses Modified Median Cut Algorithm

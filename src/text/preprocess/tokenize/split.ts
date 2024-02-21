@@ -1,49 +1,18 @@
 import { DefaultIgnoreList } from "../../../constants/stop_words.ts";
-import { StandardizeConfig } from "./types.ts";
+import { DataType } from "../../../utils/common_types.ts";
+import { BaseTokenizerOptions } from "../../../utils/common_types.ts";
 
-export function preprocess(
-  text: string,
-  { stripHtml = false, lowercase = false, normalizeWhitespaces = true },
-): string {
-  if (lowercase) {
-    text = text.toLowerCase();
-  }
-  if (stripHtml) {
-    text = text.replace(/<([^>]+)>/g, " ");
-  }
-  if (normalizeWhitespaces) {
-    text = text.replace(/\s\s+/g, " ");
-  }
-  return text;
-}
-
-export type BaseVectorizerOptions = {
-  /** Map words to indices */
-  vocabulary: Map<string, number>;
-  /** Options for standardizing text */
-  standardize: StandardizeConfig | ((s: string) => string);
-  /** Words to ignore from vocabulary */
-  skipWords: "english" | false | string[];
-};
-
-export class BaseVectorizer implements BaseVectorizerOptions {
+export class SplitTokenizer {
   /** Words to ignore from vocabulary */
   skipWords: "english" | false | string[];
   /** Configuration / Function for preprocessing */
-  standardize: StandardizeConfig | ((s: string) => string);
-  /** Map words to indices */
   vocabulary: Map<string, number>;
   /** An internal counter for remembering the last index in vocabulary. */
   #lastToken: Uint32Array;
-  constructor(options: Partial<BaseVectorizerOptions & { indices: boolean }>) {
+  constructor(
+    options: Partial<BaseTokenizerOptions & { indices: boolean }> = {}
+  ) {
     this.skipWords = options.skipWords ?? false;
-    this.standardize = typeof options.standardize === "function"
-      ? options.standardize
-      : {
-        lowercase: options.standardize?.lowercase ?? true,
-        stripHtml: options.standardize?.stripHtml ?? false,
-        normalizeWhiteSpaces: options.standardize?.normalizeWhiteSpaces ?? true,
-      };
     this.vocabulary = options.vocabulary ?? new Map();
     this.#lastToken = new Uint32Array(1);
     if (options.indices && !this.vocabulary.size) {
@@ -59,9 +28,7 @@ export class BaseVectorizer implements BaseVectorizerOptions {
     return Atomics.load(this.#lastToken, 0);
   }
   /** Construct a vocabulary from a given set of text. */
-  fit(
-    text: string | string[],
-  ): this {
+  fit(text: string | string[]): this {
     if (Array.isArray(text)) {
       let i = 0;
       while (i < text.length) {
@@ -69,7 +36,6 @@ export class BaseVectorizer implements BaseVectorizerOptions {
         i += 1;
       }
     } else {
-      text = this.preprocess(text);
       const words = this.split(text);
       let i = 0;
       while (i < words.length) {
@@ -96,10 +62,48 @@ export class BaseVectorizer implements BaseVectorizerOptions {
   #incrementToken(): number {
     return Atomics.add(this.#lastToken, 0, 1);
   }
-  preprocess(text: string): string {
-    return typeof this.standardize === "function"
-      ? this.standardize(text)
-      : preprocess(text, this.standardize);
+  /**
+   * Convert a document (string | array of strings) into vectors.
+   */
+  transform(text: string | string[]): number[][] {
+    if (!this.vocabulary.size) {
+      throw new Error(
+        "Tokenizer vocabulary not initialized yet. Call `Tokenizer()` with a custom vocabulary or use `.fit()` on text."
+      );
+    }
+    if (Array.isArray(text)) {
+      const size = Math.max(...text.map((x) => this.split(x).length));
+      const res = Array(text.length);
+      let i = 0;
+      while (i < text.length) {
+        res[i] = this.#transform(text[i], size);
+        i += 1;
+      }
+      return res;
+    } else {
+      return [this.#transform(text, 0)];
+    }
+  }
+  #transform(text: string, size: number): number[] {
+    const words = this.split(text);
+    if (!size) size = words.length;
+    const res = new Array(size);
+    res.fill(this.vocabulary.get("__pad__") || 0);
+    let i = 0;
+    while (i < words.length && i < size) {
+      if (this.vocabulary.has(words[i])) {
+        const index = this.vocabulary.get(words[i]);
+        if (typeof index === "number") {
+          res[i] = index;
+        } else {
+          res[i] = this.vocabulary.get("__unk__") || 0;
+        }
+      } else {
+        res[i] = this.vocabulary.get("__unk__") || 0;
+      }
+      i += 1;
+    }
+    return res;
   }
   // TODO: Support custom split modes
   split(text: string): string[] {

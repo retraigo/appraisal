@@ -1,5 +1,5 @@
 import { Image } from "../../../../utils/mod.ts";
-import { Patch2d, PatchCollection } from "../../../types.ts";
+import { Patch2d, PatchCollection } from "../../../../utils/common_types.ts";
 
 /**
  * Extract patches from a 2d image.
@@ -18,10 +18,7 @@ function clamp(n: number, width: number): [number, number] {
 }
 
 /** Private function to extract patches */
-function extract(
-  image: Image,
-  options: Patch2d,
-): [Uint8ClampedArray, number] {
+function extract(image: Image, options: Patch2d): [Uint8ClampedArray, number] {
   /** Get number of possible patches in each dimension */
   const nX = image.width - options.width + 1;
   const nY = image.height - options.height + 1;
@@ -31,14 +28,14 @@ function extract(
   const patchArea = options.width * options.height;
 
   const res = new Uint8ClampedArray(
-    options.width * options.height * image.channels * nPatches,
+    options.width * options.height * image.channels * nPatches
   );
 
   let i = 0;
   while (i < nPatches) {
     const [row, col] = clamp(i, nX);
     /** Starting index of the current patch */
-    const offset = (row * image.width) + col;
+    const offset = row * image.width + col;
     let j = 0;
     while (j < options.height) {
       /** Starting index of the current subrow */
@@ -47,9 +44,9 @@ function extract(
       res.set(
         image.data.slice(
           (offset + patchRow) * image.channels,
-          (offset + options.width + patchRow) * image.channels,
+          (offset + options.width + patchRow) * image.channels
         ),
-        ((i * patchArea) + (j * options.width)) * image.channels,
+        (i * patchArea + j * options.width) * image.channels
       );
       j += 1;
     }
@@ -64,10 +61,7 @@ function extract(
  * @param options Dimensions of a single patch
  * @returns A collection of patches as a single Uint8ClampedArray
  */
-export function patch2d(
-  image: Image,
-  options: Patch2d,
-): PatchCollection {
+export function patch2d(image: Image, options: Patch2d): PatchCollection {
   if (image.width < options.width) {
     throw new Error("Patch width cannot be greater than image width.");
   }

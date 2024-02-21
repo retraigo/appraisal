@@ -1,6 +1,6 @@
-import { DataType } from "../../../../utils/common_types.ts";
-import { Matrix } from "../../../../mod.ts";
-import { multiplyDiags } from "../../../../utils/math.ts";
+import { DataType } from "../../../utils/common_types.ts";
+import { Matrix } from "../../../mod.ts";
+import { multiplyDiags } from "../../../utils/math.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
 export class TfIdfTransformer {
