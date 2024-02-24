@@ -6,6 +6,6 @@
     "./text": "./src/text/mod.ts",
     "./image": "./src/image/mod.ts",
     "./encoding": "./src/encoding/mod.ts",
-    "./utils": "./src/utils /mod.ts"
+    "./utils": "./src/utils/mod.ts"
   }
 }
