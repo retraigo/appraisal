@@ -1,4 +1,4 @@
-import { Pixel } from "../../mod.ts";
+import { Pixel } from "../common_types.ts";
 
 export type ImageData = {
   data: Uint8ClampedArray;
