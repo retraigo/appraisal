@@ -1,5 +1,5 @@
-import { Image } from "../../../../utils/mod.ts";
-import { Pixel } from "../../../../utils/common_types.ts";
+import { Image } from "../../utils/mod.ts";
+import { Pixel } from "../../utils/common_types.ts";
 
 /**
  * Histogram of colors with reduced space

@@ -1,5 +1,5 @@
-import { Image } from "../../../../utils/mod.ts";
-import { Patch2d, PatchCollection } from "../../../../utils/common_types.ts";
+import { Image } from "../../utils/mod.ts";
+import { Patch2d, PatchCollection } from "../../utils/common_types.ts";
 
 /**
  * Extract patches from a 2d image.

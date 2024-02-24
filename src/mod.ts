@@ -1,4 +1,4 @@
-export * from "./feature/image.ts";
+export * from "./image/mod.ts";
 export * from "./utils/mod.ts";
 export * from "./metrics/mod.ts"
 export * from "./encoding/mod.ts"
