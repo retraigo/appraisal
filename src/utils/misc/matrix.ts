@@ -9,12 +9,19 @@ import {
 } from "../common_types.ts";
 import { getConstructor } from "./mod.ts";
 
+export type MatrixLike<DT extends DataType> = {
+  /** Raw 1D TypedArray supplied */
+  data: DType<DT>;
+  /** Number of rows, columns */
+  shape: [number, number];
+};
+
 /**
  * Class for 2D Arrays.
  * This is not akin to a mathematical Matrix (a collection of column vectors).
  * This is a collection of row vectors.
  */
-export class Matrix<DT extends DataType> implements Sliceable {
+export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
   /** Type of data in the matrix */
   dType: DT;
   /** Number of rows in the matrix */
@@ -28,16 +35,19 @@ export class Matrix<DT extends DataType> implements Sliceable {
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
+  constructor(matrix: MatrixLike<DT>, config?: undefined);
   constructor(array: DTypeValue<DT>[][], config: { dType: DT });
-  constructor(data: DType<DT>, config: { shape: [number, number?] });
+  constructor(data: DType<DT>, config: { shape: [number, number] });
   constructor(dType: DT, config: { shape: [number, number] });
   constructor(
-    data: DTypeValue<DT>[][] | DType<DT> | DT,
-    { shape, dType }: { shape: [number, number]; dType: DT }
+    data: MatrixLike<DT> | DTypeValue<DT>[][] | DType<DT> | DT,
+    config: { shape?: [number, number]; dType?: DT } | undefined = {}
   ) {
     this.nRows = this.nCols = 0;
     // Check if it is an actual array
     if (ArrayBuffer.isView(data)) {
+      const { shape } = config;
+      if(!shape) throw new Error("Cannot initialize with incomplete shape (n-rows, n-cols)");
       this.data = data;
       this.dType = getDataType(data);
       this.nRows = shape[0];
@@ -45,6 +55,8 @@ export class Matrix<DT extends DataType> implements Sliceable {
         typeof shape[1] === "number" ? shape[1] : this.data.length / shape[0];
     } else if (typeof data === "string") {
       // if not, construct a new one
+      const { shape } = config;
+      if(!shape) throw new Error("Cannot initialize with incomplete shape (n-rows, n-cols)");
       if (typeof shape[1] !== "number") {
         throw new Error("Cannot initialize with incomplete shape (n-cols)");
       }
@@ -53,11 +65,21 @@ export class Matrix<DT extends DataType> implements Sliceable {
       this.data = new (getConstructor(data))(shape[0] * shape[1]) as DType<DT>;
       this.dType = data;
     } else if (Array.isArray(data)) {
+      const { dType } = config;
+      if(!dType) throw new Error("Cannot initialize without dType.");
       this.nRows = data.length;
       this.nCols = data[0].length;
       // @ts-ignore a
       this.data = getConstructor(dType).from(data.flat(2));
       this.dType = dType;
+    } else if (data.data && data.shape) {
+      this.data = data.data;
+      this.nRows = data.shape[0];
+      this.nCols =
+        typeof data.shape[1] === "number"
+          ? data.shape[1]
+          : this.data.length / data.shape[0];
+      this.dType = getDataType(data.data);
     } else {
       throw new Error("No overload matches your call for `new Matrix()`.");
     }

@@ -1,5 +1,4 @@
 import { DefaultIgnoreList } from "../../../constants/stop_words.ts";
-import { DataType } from "../../../utils/common_types.ts";
 import { BaseTokenizerOptions } from "../../../utils/common_types.ts";
 
 export class SplitTokenizer {

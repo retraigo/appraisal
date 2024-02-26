@@ -129,12 +129,6 @@ export function getDataType<DT extends DataType>(data: DType<DT>): DT {
   ) as DT; // shouldn't reach "u8"
 }
 
-export type MatrixLike<DT extends DataType> = {
-  data: DType<DT>;
-  shape: [number, number];
-  dType: DT;
-};
-
 export interface Image2d {
   /** Width of the image */
   width: number;

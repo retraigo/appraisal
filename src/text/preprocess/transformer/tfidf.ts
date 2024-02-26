@@ -1,5 +1,5 @@
 import { DataType } from "../../../utils/common_types.ts";
-import { Matrix } from "../../../mod.ts";
+import { Matrix, MatrixLike } from "../../../mod.ts";
 import { multiplyDiags } from "../../../utils/math.ts";
 
 /** Convert tf features (CountVectorizer) into tf-idf features. */
@@ -35,7 +35,7 @@ export class TfIdfTransformer {
    * @param data tf features from CountVectorizer
    * @returns Sparse matrix of Tf-Idf features
    */
-  transform<T extends DataType>(data: Matrix<T>): Matrix<T> {
+  transform<T extends DataType>(data: MatrixLike<T>): Matrix<T> {
     if (this.idf === null) throw new Error("IDF not initialized yet.");
     return multiplyDiags(data, this.idf);
   }

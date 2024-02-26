@@ -1,13 +1,12 @@
-import { MatrixLike } from "./common_types.ts";
 import { DataType } from "./common_types.ts";
-import { Matrix } from "./misc/matrix.ts";
+import { MatrixLike, Matrix } from "./misc/matrix.ts";
 
 /** A very basic, low-effort multiplication. */
 export function multiplyDiags<T extends DataType>(
   x: MatrixLike<T>,
   y: ArrayLike<number>
 ): Matrix<T> {
-  const res = new Matrix(x.dType, { shape: x.shape });
+  const res = new Matrix(x);
   if (y.length !== res.nCols)
     throw new Error(
       `Expected diagonal vector of shape (${res.nCols}, 1). Found (${y.length}, 1).`

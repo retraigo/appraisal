@@ -1,4 +1,4 @@
-import { Matrix } from "../mod.ts";
+import { Matrix, MatrixLike } from "../mod.ts";
 import { DType, DTypeValue, DataType } from "../utils/common_types.ts";
 
 export class CategoricalEncoder<T> {
@@ -39,10 +39,11 @@ export class CategoricalEncoder<T> {
     }
     return res;
   }
-  untransform<DT extends DataType>(data: Matrix<DT>): T[] {
-    const res = new Array(data.nRows);
+  untransform<DT extends DataType>(data: MatrixLike<DT>): T[] {
+    const matrix = new Matrix(data);
+    const res = new Array(matrix.nRows);
     for (let i = 0; i < res.length; i += 1) {
-      const idx = data.row(i).findIndex((x) => x === 1);
+      const idx = matrix.row(i).findIndex((x) => x === 1);
       res[i] = this.getOg(idx) || "__unknown__";
     }
     return res;
@@ -63,9 +64,10 @@ export class CategoricalEncoder<T> {
    * This method mutates the original matrix.
    * @returns The modified matrix.
    */
-  static fromSoftmax<DT extends DataType>(data: Matrix<DT>): Matrix<DT> {
-    for (let i = 0; i < data.nRows; i += 1) {
-      const max = data
+  static fromSoftmax<DT extends DataType>(data: MatrixLike<DT>): Matrix<DT> {
+    const matrix = new Matrix(data);
+    for (let i = 0; i < matrix.nRows; i += 1) {
+      const max = matrix
         .row(i)
         // @ts-ignore It can reduce.
         .reduce(
@@ -77,15 +79,15 @@ export class CategoricalEncoder<T> {
         data.data instanceof BigInt64Array ||
         data.data instanceof BigUint64Array
       ) {
-        const newR = new Array(data.nCols).fill(0n);
+        const newR = new Array(matrix.nCols).fill(0n);
         newR[max] = 1n;
-        data.setRow(i, newR);
+        matrix.setRow(i, newR);
       } else {
-        const newR = new Array(data.nCols).fill(0);
+        const newR = new Array(matrix.nCols).fill(0);
         newR[max] = 1;
-        data.setRow(i, newR);
+        matrix.setRow(i, newR);
       }
     }
-    return data;
+    return matrix;
   }
 }
