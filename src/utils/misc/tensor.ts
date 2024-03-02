@@ -56,11 +56,12 @@ export class Tensor<DT extends DataType, O extends Order>
   data: DType<DT>;
   strides: Shape<O>;
   dType: DT;
+  constructor(tensor: TensorLike<DT, O>)
   constructor(array: NDArray<DT>[O], shape: undefined, dType: DT);
   constructor(data: DType<DT>, shape: Shape<O>);
   constructor(dType: DT, shape: Shape<O>);
   constructor(
-    data: NDArray<DT>[O] | DType<DT> | DT,
+    data: NDArray<DT>[O] | DType<DT> | DT | TensorLike<DT, O>,
     shape?: Shape<O>,
     dType?: DT
   ) {
@@ -101,6 +102,12 @@ export class Tensor<DT extends DataType, O extends Order>
       this.data = data;
       this.dType = getDataType(data);
       this.strides = Tensor.getStrides(this.shape);
+    } else if (data.shape) {
+      this.data = data.data;
+      this.shape = data.shape;
+      this.dType = getDataType(data.data)
+      this.order = this.shape.length as O;
+      this.strides = Tensor.getStrides(this.shape)
     } else {
       throw new Error("Tensor initialization does not follow any overload.");
     }

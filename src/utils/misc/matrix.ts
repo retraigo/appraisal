@@ -1,19 +1,18 @@
 import {
   DataType,
-  getDataType,
   DType,
   DTypeConstructor,
   DTypeValue,
   AddDTypeValues,
   Sliceable,
 } from "../common_types.ts";
-import { getConstructor } from "./mod.ts";
+import { NDArray, Shape, Tensor, TensorLike } from "./tensor.ts";
 
 export type MatrixLike<DT extends DataType> = {
   /** Raw 1D TypedArray supplied */
   data: DType<DT>;
   /** Number of rows, columns */
-  shape: [number, number];
+  shape: Shape<2>;
 };
 
 /**
@@ -21,68 +20,26 @@ export type MatrixLike<DT extends DataType> = {
  * This is not akin to a mathematical Matrix (a collection of column vectors).
  * This is a collection of row vectors.
  */
-export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
-  /** Type of data in the matrix */
-  dType: DT;
-  /** Number of rows in the matrix */
-  nRows: number;
-  /** Number of columns in the matrix */
-  nCols: number;
-  /** Raw 1D TypedArray supplied */
-  data: DType<DT>;
+export class Matrix<DT extends DataType>
+  extends Tensor<DT, 2>
+  implements Sliceable, MatrixLike<DT>
+{
   /**
    * Create a matrix from a typed array
    * @param data Data to move into the matrix.
    * @param shape [rows, columns] of the matrix.
    */
-  constructor(matrix: MatrixLike<DT>, config?: undefined);
-  constructor(array: DTypeValue<DT>[][], config: { dType: DT });
-  constructor(data: DType<DT>, config: { shape: [number, number] });
-  constructor(dType: DT, config: { shape: [number, number] });
+  constructor(matrix: TensorLike<DT, 2>);
+  constructor(array: NDArray<DT>[2], shape: undefined, dType: DT);
+  constructor(data: DType<DT>, shape: Shape<2>);
+  constructor(dType: DT, shape: Shape<2>);
   constructor(
-    data: MatrixLike<DT> | DTypeValue<DT>[][] | DType<DT> | DT,
-    config: { shape?: [number, number]; dType?: DT } | undefined = {}
+    data: NDArray<DT>[2] | DType<DT> | DT | TensorLike<DT, 2>,
+    shape?: Shape<2>,
+    dType?: DT
   ) {
-    this.nRows = this.nCols = 0;
-    // Check if it is an actual array
-    if (ArrayBuffer.isView(data)) {
-      const { shape } = config;
-      if(!shape) throw new Error("Cannot initialize with incomplete shape (n-rows, n-cols)");
-      this.data = data;
-      this.dType = getDataType(data);
-      this.nRows = shape[0];
-      this.nCols =
-        typeof shape[1] === "number" ? shape[1] : this.data.length / shape[0];
-    } else if (typeof data === "string") {
-      // if not, construct a new one
-      const { shape } = config;
-      if(!shape) throw new Error("Cannot initialize with incomplete shape (n-rows, n-cols)");
-      if (typeof shape[1] !== "number") {
-        throw new Error("Cannot initialize with incomplete shape (n-cols)");
-      }
-      this.nRows = shape[0];
-      this.nCols = shape[1];
-      this.data = new (getConstructor(data))(shape[0] * shape[1]) as DType<DT>;
-      this.dType = data;
-    } else if (Array.isArray(data)) {
-      const { dType } = config;
-      if(!dType) throw new Error("Cannot initialize without dType.");
-      this.nRows = data.length;
-      this.nCols = data[0].length;
-      // @ts-ignore a
-      this.data = getConstructor(dType).from(data.flat(2));
-      this.dType = dType;
-    } else if (data.data && data.shape) {
-      this.data = data.data;
-      this.nRows = data.shape[0];
-      this.nCols =
-        typeof data.shape[1] === "number"
-          ? data.shape[1]
-          : this.data.length / data.shape[0];
-      this.dType = getDataType(data.data);
-    } else {
-      throw new Error("No overload matches your call for `new Matrix()`.");
-    }
+    // @ts-ignore This call will work
+    super(data, shape, dType);
   }
   /** Convert the Matrix into a HTML table */
   get html(): string {
@@ -107,9 +64,13 @@ export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
   get length(): number {
     return this.nRows;
   }
-  /** Returns [rows, columns] */
-  get shape(): [number, number] {
-    return [this.nRows, this.nCols];
+  /** Returns number of cols */
+  get nCols(): number {
+    return this.shape[1];
+  }
+  /** Returns number of rows */
+  get nRows(): number {
+    return this.shape[0];
   }
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<DT> {
@@ -122,7 +83,7 @@ export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
       resArr.set(col, i * this.nRows);
       i += 1;
     }
-    return new Matrix(resArr, { shape: [this.nCols, this.nRows] });
+    return new Matrix(resArr, this.shape);
   }
   /** Get a pretty version for printing. DO NOT USE FOR MATRICES WITH MANY COLUMNS. */
   get pretty(): string {
@@ -219,9 +180,7 @@ export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
       }
       i += 1;
     }
-    const matrix = new Matrix(this.dType, {
-      shape: [satisfying.length, this.nCols],
-    });
+    const matrix = new Matrix(this.dType, [satisfying.length, this.nCols]);
     i = 0;
     while (i < satisfying.length) {
       // @ts-ignore This line will work
@@ -302,7 +261,7 @@ export class Matrix<DT extends DataType> implements Sliceable, MatrixLike<DT> {
         start ? start * this.nCols : 0,
         end ? end * this.nCols : undefined
       ) as DType<DT>,
-      { shape: [end ? end - start : this.nRows - start, this.nCols] }
+      [end ? end - start : this.nRows - start, this.nCols]
     );
   }
   /** Iterate through rows */
