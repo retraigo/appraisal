@@ -1,3 +1,8 @@
+/**
+ * Multi-dimensional representation of data.
+ * @module
+ */
+
 import {
   DataType,
   DType,

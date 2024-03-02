@@ -1,3 +1,8 @@
+/**
+ * A 2D Tensor with more methods.
+ * @module
+ */
+
 import {
   DataType,
   DType,
@@ -19,6 +24,7 @@ export type MatrixLike<DT extends DataType> = {
  * Class for 2D Arrays.
  * This is not akin to a mathematical Matrix (a collection of column vectors).
  * This is a collection of row vectors.
+ * A special case of Tensor for 2D data.
  */
 export class Matrix<DT extends DataType>
   extends Tensor<DT, 2>

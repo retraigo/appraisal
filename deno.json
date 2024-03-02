@@ -5,7 +5,9 @@
     ".": "./mod.ts",
     "./text": "./src/text/mod.ts",
     "./image": "./src/image/mod.ts",
+    "./metrics": "./src/metrics/mod.ts",
     "./encoding": "./src/encoding/mod.ts",
-    "./utils": "./src/utils/mod.ts"
+    "./tensor": "./src/utils/tensor.ts",
+    "./matrix": "./src/utils/matrix.ts"
   }
 }
