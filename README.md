@@ -1,6 +1,6 @@
 # Appraisal
 
-- Extract / Convert features from Data
+- Machine Learning utilities for TypeScript.
 
 ## Modules
 - [Text Vectorizer](/src/text)
