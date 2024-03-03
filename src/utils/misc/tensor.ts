@@ -12,14 +12,7 @@ import {
 } from "../common_types.ts";
 import { getConstructor } from "./get_constructor.ts";
 
-export enum Order {
-  /** A collection of scalars */
-  Vector = 1,
-  Matrix = 2,
-  T3 = 3,
-  T4 = 4,
-  T5 = 5,
-}
+export type Order = 1 | 2 | 3 | 4 | 5;
 
 export type TensorLike<DT extends DataType, O extends Order> = {
   data: DType<DT>;
