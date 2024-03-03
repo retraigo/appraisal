@@ -185,7 +185,7 @@ export class Tensor<DT extends DataType, O extends Order>
     }
     return res;
   }
-  toJSON() {
+  toJSON(): { data: DTypeValue<DT>[]; shape: Shape<O> } {
     return {
       // @ts-ignore I have no idea why TS is doing this
       data: Array.from(this.data) as DTypeValue<DT>[],

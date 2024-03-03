@@ -1,6 +1,6 @@
 {
   "name": "@lala/appraisal",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "exports": {
     ".": "./mod.ts",
     "./text": "./src/text/mod.ts",
