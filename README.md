@@ -3,12 +3,11 @@
 - Extract / Convert features from Data
 
 ## Modules
-- [Text Vectorizer](/feature/conversion/text/mod.ts)
-- [Color Extractor](/feature/extraction/image/colors/mod.ts)
-- [Patch Extractor](/feature/extraction/image/patches/patch_2d.ts)
-- [Confusion Matrix](/metrics/confusion_matrix.ts)
+- [Text Vectorizer](/src/text)
+- [Image](/src/image)
+- [Metrics](/src/metrics)
 
-## Usage
+## Example: Text
 
 ```ts
 const data = [
@@ -18,72 +17,26 @@ const data = [
   "like a diamond in the sky",
 ];
 
-const vectorizer = new TextVectorizer({
-  mode: "tfidf",
-  config: { standardize: { lowercase: true } },
+// Clean the text
+const cleaner = new TextCleaner({
+  lowercase: true,
+  stripHtml: true,
+  stripNewlines: true,
+  normalizeWhiteSpaces: true,
 });
+x = cleaner.clean(x);
 
-vectorizer.fit(data, "f32");
+// Tokenize the text
+const tokenizer = new SplitTokenizer();
+tokenizer.fit(x);
+const x_tokens = tokenizer.transform(x);
 
-const vec = vectorizer.transform(data, "f32");
+// Vectorize the tokens
+const vectorizer = new CountVectorizer(tokenizer.vocabulary.size);
+const x_vec = vectorizer.transform(x_tokens, "f32");
 
-console.log(vec);
+// Apply Tf-Idf transformation
+const transformer = new TfIdfTransformer();
+console.log(transformer.fit(x_vec).transform(x_vec));
+
 ```
-
-<details> 
-  <summary>Output</summary>
-  <pre>
-    <code>
-[
-  Float64Array(20) [
-    3.386294364929199, 2.386294364929199,
-    2.386294364929199,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0
-  ],
-  Float64Array(20) [
-                    0,                 0,
-                    0, 2.386294364929199,
-    2.386294364929199, 2.386294364929199,
-    2.386294364929199, 2.386294364929199,
-    2.386294364929199,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0,
-                    0,                 0
-  ],
-  Float64Array(20) [
-                    0,                  0,
-                    0,                  0,
-                    0,                  0,
-                    0,                  0,
-                    0,  2.386294364929199,
-    2.386294364929199, 1.6931471824645996,
-    2.386294364929199,  2.386294364929199,
-    2.386294364929199,                  0,
-                    0,                  0,
-                    0,                  0
-  ],
-  Float64Array(20) [
-                    0,                  0,
-                    0,                  0,
-                    0,                  0,
-                    0,                  0,
-                    0,                  0,
-                    0, 1.6931471824645996,
-                    0,                  0,
-                    0,  2.386294364929199,
-    2.386294364929199,  2.386294364929199,
-    2.386294364929199,  2.386294364929199
-  ]
-]
-    </code>
-  </pre>
-</details>
