@@ -61,7 +61,7 @@ export class Tensor<DT extends DataType, O extends Order>
   data: DType<DT>;
   strides: Shape<O>;
   dType: DT;
-  constructor(tensor: TensorLike<DT, O>)
+  constructor(tensor: TensorLike<DT, O>);
   constructor(array: NDArray<DT>[O], shape: undefined, dType: DT);
   constructor(data: DType<DT>, shape: Shape<O>);
   constructor(dType: DT, shape: Shape<O>);
@@ -110,9 +110,9 @@ export class Tensor<DT extends DataType, O extends Order>
     } else if (data.shape) {
       this.data = data.data;
       this.shape = data.shape;
-      this.dType = getDataType(data.data)
+      this.dType = getDataType(data.data);
       this.order = this.shape.length as O;
-      this.strides = Tensor.getStrides(this.shape)
+      this.strides = Tensor.getStrides(this.shape);
     } else {
       throw new Error("Tensor initialization does not follow any overload.");
     }
@@ -151,6 +151,12 @@ export class Tensor<DT extends DataType, O extends Order>
     }
     return res;
   }
+  /** Get an item using indices */
+  item(...indices: number[]): DTypeValue<DT> {
+    return this.data[
+      indices.reduce((acc, val, i) => acc + val * this.strides[i])
+    ] as DTypeValue<DT>;
+  }
   /** Slice matrix by axis */
   slice(start = 0, end?: number, axis = 0): Tensor<DT, O> {
     if (axis > this.strides.length - 1)
@@ -186,16 +192,6 @@ export class Tensor<DT extends DataType, O extends Order>
       shape: this.shape,
     };
   }
-  /** Iterate along the first axis */
-  *iter(): Generator<DType<DT>> {
-    let i = 0;
-    const stride = this.strides[0]
-    while (i < this.data.length) {
-      yield this.data.slice(i * stride, (i + 1) * stride) as DType<DT>;
-      i += 1;
-    }
-  }
-
   static getStrides<O extends Order>(shape: Shape<O>): Shape<O> {
     const strides = new Array(shape.length).fill(1);
     for (let i = 0; i < shape.length; i += 1) {
@@ -204,22 +200,3 @@ export class Tensor<DT extends DataType, O extends Order>
     return strides as Shape<O>;
   }
 }
-
-console.log(
-  new Tensor(
-    [
-      [
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12],
-      ],
-      [
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12],
-      ],
-    ],
-    undefined,
-    "u8"
-  ).slice(0, 2, 1)
-);
