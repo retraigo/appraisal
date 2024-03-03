@@ -12,7 +12,7 @@ import {
 } from "../common_types.ts";
 import { getConstructor } from "./get_constructor.ts";
 
-export type Order = 1 | 2 | 3 | 4 | 5;
+export type Order = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type TensorLike<DT extends DataType, O extends Order> = {
   data: DType<DT>;
@@ -29,6 +29,7 @@ export type NDArray<DT extends DataType> = {
   3: DTypeValue<DT>[][][];
   4: DTypeValue<DT>[][][][];
   5: DTypeValue<DT>[][][][][];
+  6: DTypeValue<DT>[][][][][][];
 };
 
 function getShape<O extends Order, DT extends DataType>(
