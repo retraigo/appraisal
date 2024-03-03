@@ -24,9 +24,7 @@ export class CategoricalEncoder<T> {
   }
   /** One-hot encoding of categorical values */
   transform<DT extends DataType>(targets: T[], dType: DT): Matrix<DT> {
-    const res = new Matrix<DT>(dType, {
-      shape: [targets.length, this.#lastToken[0]],
-    });
+    const res = new Matrix<DT>(dType, [targets.length, this.#lastToken[0]]);
     let i = 0;
     while (i < targets.length) {
       const index = this.mapping.get(targets[i]);

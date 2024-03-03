@@ -17,9 +17,7 @@ export class MultiHotVectorizer {
     if (!this.vocabSize) {
       throw new Error("Vocab not initialized.");
     }
-    const res = new Matrix(dType, {
-      shape: [tokens.length, this.vocabSize],
-    });
+    const res = new Matrix(dType, [tokens.length, this.vocabSize]);
     let i = 0;
     while (i < tokens.length) {
       res.setRow(i, this.#transform<T>(tokens[i], dType));
