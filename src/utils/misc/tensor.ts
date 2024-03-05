@@ -90,7 +90,7 @@ export class Tensor<DT extends DataType, O extends Order>
         this.shape = getShape(data);
         this.order = this.shape.length as O;
         // @ts-ignore They're mapped correctly
-        this.data = getConstructor(dType).from(
+        this.data = getConstructor(shape).from(
           data.flat(this.shape.length) as DTypeValue<DT>[]
         ) as DType<DT>;
         this.dType = shape;
