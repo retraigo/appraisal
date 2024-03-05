@@ -56,17 +56,18 @@ export class Tensor<DT extends DataType, O extends Order>
   strides: Shape<O>;
   dType: DT;
   constructor(tensor: TensorLike<DT, O>);
-  constructor(array: NDArray<DT>[O], shape: undefined, dType: DT);
+  constructor(array: NDArray<DT>[O], dType: DT);
   constructor(data: DType<DT>, shape: Shape<O>);
   constructor(dType: DT, shape: Shape<O>);
   constructor(
     data: NDArray<DT>[O] | DType<DT> | DT | TensorLike<DT, O>,
-    shape?: Shape<O>,
-    dType?: DT
+    shape?: Shape<O> | DType<DT>
   ) {
     if (typeof data === "string") {
-      if (!shape)
-        throw new Error(`Expected shape to be defined. Got ${shape}.`);
+      if (!shape || !Array.isArray(shape))
+        throw new Error(
+          `Expected shape to be defined as an Array. Got ${shape}.`
+        );
       else {
         this.data = new (getConstructor(data))(
           shape.reduce((acc, val) => acc * val, 1)
@@ -77,9 +78,9 @@ export class Tensor<DT extends DataType, O extends Order>
         this.strides = Tensor.getStrides(this.shape);
       }
     } else if (Array.isArray(data)) {
-      if (!dType)
+      if (!shape || typeof shape !== "string")
         throw new Error(
-          `Expected dType to be defined when using a normal array. Got ${dType}.`
+          `Expected dType to be defined when using a normal array. Got ${shape}.`
         );
       else {
         this.shape = getShape(data);
@@ -88,11 +89,11 @@ export class Tensor<DT extends DataType, O extends Order>
         this.data = getConstructor(dType).from(
           data.flat(this.shape.length) as DTypeValue<DT>[]
         ) as DType<DT>;
-        this.dType = dType;
+        this.dType = shape;
         this.strides = Tensor.getStrides(this.shape);
       }
     } else if (ArrayBuffer.isView(data)) {
-      if (!shape)
+      if (!shape || !Array.isArray(shape))
         throw new Error(
           `Shape must be defined when Tensor is constructed from a TypedArray.`
         );

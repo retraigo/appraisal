@@ -36,16 +36,15 @@ export class Matrix<DT extends DataType>
    * @param shape [rows, columns] of the matrix.
    */
   constructor(matrix: TensorLike<DT, 2>);
-  constructor(array: NDArray<DT>[2], shape: undefined, dType: DT);
+  constructor(array: NDArray<DT>[2], dType: DT);
   constructor(data: DType<DT>, shape: Shape<2>);
   constructor(dType: DT, shape: Shape<2>);
   constructor(
     data: NDArray<DT>[2] | DType<DT> | DT | TensorLike<DT, 2>,
-    shape?: Shape<2>,
-    dType?: DT
+    shape?: Shape<2> | DT
   ) {
     // @ts-ignore This call will work
-    super(data, shape, dType);
+    super(data, shape);
   }
   /** Convert the Matrix into a HTML table */
   get html(): string {
