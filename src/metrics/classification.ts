@@ -8,6 +8,7 @@ type Report = {
   support: number;
 };
 
+/** A report with metrics for classification results */
 export class ClassificationReport {
   /** Number of elements classified correctly */
   true: number;
@@ -199,6 +200,7 @@ export const recallScore = sensitivityScore;
 export function specificityScore(cMatrix: ConfusionMatrix): number {
   return cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive);
 }
+/** Compute F1 Score */
 export function f1Score(cMatrix: ConfusionMatrix): number {
   return (
     (2 * cMatrix.truePositive) /
@@ -206,6 +208,7 @@ export function f1Score(cMatrix: ConfusionMatrix): number {
   );
 }
 
+/** Compute Cohen's Kappa to find Agreement */
 export function cohensKappa(cMatrix: ConfusionMatrix): number {
   const actualAgreement = accuracyScore(cMatrix);
   const expectedAgreement =

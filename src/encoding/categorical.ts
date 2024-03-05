@@ -1,6 +1,7 @@
 import { Matrix, MatrixLike } from "../mod.ts";
 import { DType, DTypeValue, DataType } from "../utils/common_types.ts";
 
+/** Convert class labels into categorical variables (one-hot) */
 export class CategoricalEncoder<T> {
   /** Map categories to indices */
   mapping: Map<T, number>;

@@ -10,6 +10,7 @@ import type {
 // import { CountVectorizer } from "./vectorize/mod.ts";
 // import { TfIdfTransformer } from "./transformer/mod.ts";
 
+/** TODO */
 type PreprocessorConfig = {
   vectorizer: Vectorizer;
   tokenizer: Tokenizer;
@@ -17,6 +18,7 @@ type PreprocessorConfig = {
   transformer: Transformer;
 };
 
+/** TODO */
 export class TextPreprocessor implements Partial<PreprocessorConfig> {
   // todo
 }

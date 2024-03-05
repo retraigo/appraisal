@@ -13,6 +13,7 @@ import {
 } from "../common_types.ts";
 import { NDArray, Shape, Tensor, TensorLike } from "./tensor.ts";
 
+/** The base type implemented by Matrix */
 export type MatrixLike<DT extends DataType> = {
   /** Raw 1D TypedArray supplied */
   data: DType<DT>;

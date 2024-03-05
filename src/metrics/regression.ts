@@ -21,6 +21,7 @@ export function rmse(y: ArrayLike<number>, y1: ArrayLike<number>): number {
   return Math.sqrt(mse(y, y1));
 }
 
+/** R2 Score for regression */
 export function r2(y: ArrayLike<number>, y1: ArrayLike<number>): number {
   let mean = 0;
   for (let i = 0; i < y.length; i += 1) {

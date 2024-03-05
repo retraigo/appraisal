@@ -1,5 +1,6 @@
 import { StandardizeConfig } from "../../utils/common_types.ts";
 
+/** Simple text cleaner */
 export class TextCleaner implements StandardizeConfig {
   stripHtml: boolean;
   lowercase: boolean;
@@ -26,6 +27,7 @@ export class TextCleaner implements StandardizeConfig {
   }
 }
 
+/** Function for quick cleaning of text */
 export function preprocess(
   text: string,
   {

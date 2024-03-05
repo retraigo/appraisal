@@ -1,6 +1,7 @@
 import { DefaultIgnoreList } from "../../../constants/stop_words.ts";
 import { BaseTokenizerOptions } from "../../../utils/common_types.ts";
 
+/** Tokenize text based on separator (whitespace) */
 export class SplitTokenizer {
   /** Words to ignore from vocabulary */
   skipWords: "english" | false | string[];
